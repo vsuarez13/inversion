@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mi panel de inversión</title>
+<meta name="description" content="Panel personal: índices en vivo, buscador de empresas por ISIN con ratios explicados y fuentes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-in">
+    <a class="brand" href="#/">Mi panel de inversión</a>
+    <nav class="nav" aria-label="Secciones">
+      <a href="#/" data-nav="inicio">Mercados</a>
+      <a href="#/guia" data-nav="guia">Guía de ratios</a>
+      <a href="#/cartera" data-nav="cartera">Cartera</a>
+    </nav>
+  </div>
+</header>
+
+<div id="aviso" class="aviso" hidden></div>
+
+<main>
+  <!-- PORTADA -->
+  <section id="v-inicio" class="vista">
+    <div class="wrap">
+      <form id="buscador" class="buscador" autocomplete="off">
+        <label for="q" class="buscador-tit">Buscar empresa por ISIN</label>
+        <div class="buscador-fila">
+          <input id="q" name="q" type="text" inputmode="text" placeholder="Ej.: ES0118594417" maxlength="12" spellcheck="false" aria-describedby="q-ayuda">
+          <button type="submit" class="btn">Buscar</button>
+        </div>
+        <p id="q-ayuda" class="ayuda">Pega el código de 12 caracteres (dos letras del país y diez caracteres). Lo encuentras en la ficha de la acción de tu bróker.</p>
+        <p id="q-error" class="error" hidden></p>
+      </form>
+      <div id="recientes" class="chips" hidden></div>
+      <div id="base-lista" class="base-lista"></div>
+    </div>
+
+    <div class="cinta"><div class="tradingview-widget-container" id="tv-cinta"></div></div>
+
+    <div class="wrap">
+      <div class="sec-cab">
+        <h2>Índices principales</h2>
+        <p class="meta" id="meta-indices"></p>
+      </div>
+      <div class="indices" id="indices"></div>
+    </div>
+  </section>
+
+  <!-- FICHA DE EMPRESA -->
+  <section id="v-empresa" class="vista" hidden>
+    <div class="wrap" id="empresa"></div>
+  </section>
+
+  <!-- GUÍA -->
+  <section id="v-guia" class="vista" hidden>
+    <div class="wrap">
+      <h1 class="tit">Guía de ratios</h1>
+      <p class="intro">Qué significa cada ratio de las fichas, cómo leerlo y qué trampas tiene. Los rangos normales cambian según el sector: en cada ficha verás el rango de su sector.</p>
+      <div id="guia"></div>
+    </div>
+  </section>
+
+  <!-- CARTERA (próximamente) -->
+  <section id="v-cartera" class="vista" hidden>
+    <div class="wrap">
+      <h1 class="tit">Cartera virtual</h1>
+      <p class="intro">Próximamente. Aquí podrás montar una cartera, por ISIN, con tus acciones o directamente la cartera Metal de MyInvestor, y ver:</p>
+      <ul class="lista">
+        <li><b>Matriz de correlación de Pearson</b> entre todos los activos, para saber qué se mueve junto y qué descorrelaciona.</li>
+        <li><b>Comparar activos</b> de dos en dos: evolución, volatilidad y caídas máximas.</li>
+        <li><b>Peso por país, sector y divisa</b> de toda la cartera.</li>
+      </ul>
+      <div class="pearson-demo">
+        <h2>Cómo se leerá la tabla</h2>
+        <div class="escala" aria-hidden="true">
+          <span style="--c:var(--neg)">−1</span><span style="--c:var(--neutro)">0</span><span style="--c:var(--pos)">+1</span>
+        </div>
+        <p><b>+1</b>: se mueven exactamente igual (no diversifican). <b>0</b>: sin relación (diversifican). <b>−1</b>: se mueven al revés (se protegen entre sí). Entre activos de bolsa lo normal es 0,6–0,9.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="pie">
+  <div class="wrap">
+    <p>Uso personal. No es asesoramiento financiero. Cotizaciones y gráficos: <a href="https://www.tradingview.com/" rel="noopener">TradingView</a>. Datos de empresas de EE. UU.: <a href="https://finnhub.io/" rel="noopener">Finnhub</a>. Fichas europeas: base propia con la fuente de cada dato.</p>
+  </div>
+</footer>
+
+<script src="assets/config.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

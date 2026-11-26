@@ -1,0 +1,50 @@
+{
+  "actualizado": "2026-11-26",
+  "empresas": {
+    "ES0118594417": {
+      "nombre": "Indra Sistemas", "ticker": "IDR", "bolsa": "Bolsa de Madrid", "tv": "BME:IDR", "pais": "España", "divisa": "EUR", "sector": "defensa_tecnologia",
+      "descripcion": "Grupo español de defensa, tráfico aéreo, transporte y servicios tecnológicos (Minsait). Muy ligado al aumento del gasto en defensa en Europa.",
+      "precio": {"v": 56.70, "fecha": "2026-11-26", "fuente": "sa"},
+      "ratios": {"cap_bursatil": 9930, "ev": 9060, "per_ttm": 19.96, "per_fwd": 17.19, "peg": 0.80, "ev_ebitda": 10.76, "ev_ventas": 1.39, "p_ventas": 1.53, "p_vc": 4.76, "deuda_ebitda": 1.71, "deuda_patrimonio": 0.60, "liquidez": 1.86, "margen_bruto": 22.24, "margen_operativo": 10.04, "margen_ebitda": 12.53, "margen_neto": 7.69, "margen_fcf": 33.36, "roe": 26.33, "roic": 33.56, "rent_dividendo": 0.53, "payout": 10.50, "beta": 0.98, "var_52s": 28.05},
+      "analistas": {"consenso": "Comprar", "n": 16, "objetivo": 71.32, "potencial": 25.79, "fuente": "sa"},
+      "notas": ["Tiene más caja que deuda: 1.170 M€ de caja neta, así que el riesgo de la deuda es menor de lo que sugiere Deuda/EBITDA (bruta).", "El margen de flujo de caja libre (33 %) es excepcional, probablemente por anticipos de clientes en contratos de defensa; no hay que esperar que se repita cada año."],
+      "fuentes": {"sa": {"nombre": "Stockanalysis (datos de S&P Global Market Intelligence)", "url": "https://stockanalysis.com/quote/bme/IDR/statistics/", "fecha": "2026-11-26"}, "ms": {"nombre": "MarketScreener · valoración y consenso (para contrastar)", "url": "https://uk.marketscreener.com/quote/stock/INDRA-SISTEMAS-S-A-413470/valuation/", "fecha": null}}
+    },
+    "FR0004186856": {
+      "nombre": "Vetoquinol", "ticker": "VETO", "bolsa": "Euronext París", "tv": "EURONEXT:VETO", "pais": "Francia", "divisa": "EUR", "sector": "salud_animal",
+      "descripcion": "Laboratorio veterinario francés y familiar: medicamentos para mascotas y ganado. Vuelve a crecer en 2026 gracias a su gama principal de productos (Essentials).",
+      "precio": {"v": 77.40, "fecha": "2026-09-11", "fuente": "sa"},
+      "ratios": {"cap_bursatil": 899.55, "ev": 693.83, "per_ttm": 14.33, "per_fwd": 14.10, "peg": null, "ev_ebitda": 6.08, "ev_ventas": 1.32, "p_ventas": 1.71, "p_vc": null, "deuda_ebitda": null, "deuda_patrimonio": null, "liquidez": null, "margen_bruto": 59.25, "margen_operativo": 16.10, "margen_ebitda": 20.47, "margen_neto": 11.90, "margen_fcf": 15.41, "roe": null, "roic": 14.69, "rent_dividendo": 1.33, "payout": 16.57, "beta": 0.87, "var_52s": 6.91},
+      "analistas": {"consenso": "Comprar", "n": 4, "objetivo": 91.50, "potencial": 18.22, "fuente": "sa"},
+      "notas": ["Los datos de Stockanalysis para Vetoquinol son del 11/09/2026: es una empresa pequeña y su ficha se actualiza con menos frecuencia. Se refrescará en la próxima actualización.", "Su valor de empresa (694 M€) es menor que su capitalización (900 M€): tiene caja neta.", "Pocos analistas la siguen (4) y la familia controla la mayoría del capital: poca liquidez en bolsa."],
+      "fuentes": {"sa": {"nombre": "Stockanalysis (datos de S&P Global Market Intelligence)", "url": "https://stockanalysis.com/quote/epa/VETO/statistics/", "fecha": "2026-09-13"}, "inf": {"nombre": "Vetoquinol · ventas del tercer trimestre de 2026 (ABC Bourse)", "url": "https://www.abcbourse.com/marches/vetoquinol-affiche-une-croissance-de-10-4-de-son-chiffre-daffaires-au-troisiem_705078", "fecha": null}}
+    },
+    "GB0002074580": {
+      "nombre": "Genus", "ticker": "GNS", "bolsa": "Bolsa de Londres", "tv": "LSE:GNS", "pais": "Reino Unido", "divisa": "GBP", "sector": "genetica_agro",
+      "descripcion": "Genética animal: cerdos (PIC) y vacuno (ABS). Cobra royalties por la genética. Su gran catalizador es el cerdo resistente al PRRS, pendiente de aprobación en México, Japón y China.",
+      "precio": {"v": 23.28, "fecha": "2026-10-09", "fuente": "sa", "nota": "2.328 peniques"},
+      "ratios": {"cap_bursatil": 1560, "ev": 1620, "per_ttm": 5.23, "per_fwd": 21.25, "peg": 1.38, "ev_ebitda": 10.29, "ev_ventas": 2.36, "p_ventas": 2.26, "p_vc": 1.94, "deuda_ebitda": 0.93, "deuda_patrimonio": 0.14, "liquidez": 2.22, "margen_bruto": null, "margen_operativo": 12.14, "margen_ebitda": 15.73, "margen_neto": 43.35, "margen_fcf": 9.41, "roe": 45.95, "roic": 8.85, "rent_dividendo": 1.51, "payout": 7.61, "beta": 0.91, "var_52s": -11.12},
+      "analistas": {"consenso": "Compra fuerte", "n": 13, "objetivo": 30.40, "potencial": 30.58, "fuente": "sa"},
+      "notas": ["El PER de los últimos 12 meses (5,2), el margen neto (43 %) y el ROE (46 %) están inflados por un beneficio extraordinario: no reflejan el negocio recurrente. Usa el PER forward (21,3). Con el beneficio ajustado del año fiscal 2026 (110,3 peniques por acción) sale un PER de unas 21 veces.", "Datos de Stockanalysis del 08/10/2026; precio en libras (cotiza en peniques).", "Margen bruto no aplicable: Stockanalysis lo muestra como 100 %, una cifra que no tiene sentido para este negocio."],
+      "fuentes": {"sa": {"nombre": "Stockanalysis (datos de S&P Global Market Intelligence)", "url": "https://stockanalysis.com/quote/lon/GNS/statistics", "fecha": "2026-10-08"}, "inf": {"nombre": "Genus · resultados preliminares del año fiscal 2026", "url": "https://www.investegate.co.uk/announcement/rns/genus--gns/preliminary-results/9764361", "fecha": "2026-09-10"}}
+    },
+    "FR0000124141": {
+      "nombre": "Veolia Environnement", "ticker": "VIE", "bolsa": "Euronext París", "tv": "EURONEXT:VIE", "pais": "Francia", "divisa": "EUR", "sector": "agua_residuos",
+      "descripcion": "Líder mundial en agua, residuos y servicios energéticos. Negocio defensivo, con contratos largos y precios ligados a la inflación.",
+      "precio": {"v": 33.01, "fecha": "2026-10-30", "fuente": "sa"},
+      "ratios": {"cap_bursatil": 24170, "ev": 51070, "per_ttm": 20.87, "per_fwd": 13.08, "peg": 1.41, "ev_ebitda": 7.98, "ev_ventas": 1.15, "p_ventas": 0.54, "p_vc": 1.79, "deuda_ebitda": 5.35, "deuda_patrimonio": 2.50, "liquidez": 0.82, "margen_bruto": 17.86, "margen_operativo": 7.87, "margen_ebitda": 12.95, "margen_neto": 2.79, "margen_fcf": 4.88, "roe": 13.43, "roic": 4.87, "rent_dividendo": 4.54, "payout": 97.67, "beta": 0.99, "var_52s": 13.13},
+      "analistas": {"consenso": "Comprar", "n": 19, "objetivo": 38.11, "potencial": 15.45, "fuente": "sa"},
+      "notas": ["Deuda neta de 24.270 M€: alta, pero habitual en el sector por los contratos largos y los activos de infraestructura.", "El payout cercano al 98 % está calculado sobre beneficio contable; la empresa lo cubre con caja recurrente, pero deja poco margen."],
+      "fuentes": {"sa": {"nombre": "Stockanalysis (datos de S&P Global Market Intelligence)", "url": "https://stockanalysis.com/quote/epa/VIE/statistics/", "fecha": "2026-10-31"}, "ms": {"nombre": "MarketScreener · finanzas (para contrastar)", "url": "https://uk.marketscreener.com/quote/stock/VEOLIA-ENVIRONNEMENT-4726/finances/", "fecha": null}}
+    },
+    "ES0173093024": {
+      "nombre": "Redeia Corporación", "ticker": "RED", "bolsa": "Bolsa de Madrid", "tv": "BME:RED", "pais": "España", "divisa": "EUR", "sector": "utilities_reguladas",
+      "descripcion": "Matriz de Red Eléctrica: transporte de electricidad y operación del sistema eléctrico español, con ingresos regulados.",
+      "precio": {"v": 14.80, "fecha": "2026-10-02", "fuente": "sa"},
+      "ratios": {"cap_bursatil": 8010, "ev": 13170, "per_ttm": 16.63, "per_fwd": 15.62, "peg": 3.89, "ev_ebitda": 11.32, "ev_ventas": 7.35, "p_ventas": 4.47, "p_vc": 1.38, "deuda_ebitda": 5.49, "deuda_patrimonio": 1.05, "liquidez": 1.18, "margen_bruto": 98.31, "margen_operativo": 34.96, "margen_ebitda": 61.48, "margen_neto": 28.82, "margen_fcf": null, "roe": 9.86, "roic": 3.36, "rent_dividendo": 5.41, "payout": 89.23, "beta": 0.47, "var_52s": -9.54},
+      "analistas": {"consenso": "Mantener", "n": 22, "objetivo": 16.60, "potencial": 12.16, "fuente": "sa"},
+      "notas": ["Deuda neta de 5.090 M€. Su Deuda/EBITDA de 5,5 es alta para un negocio normal, pero habitual en redes reguladas con ingresos garantizados.", "Muy sensible a los tipos de interés: con el BCE subiendo, el sector ha bajado.", "Datos de Stockanalysis del 04/10/2026."],
+      "fuentes": {"sa": {"nombre": "Stockanalysis (datos de S&P Global Market Intelligence)", "url": "https://stockanalysis.com/quote/bme/RED/statistics/", "fecha": "2026-10-04"}, "ms": {"nombre": "MarketScreener · ficha (para contrastar)", "url": "https://uk.marketscreener.com/quote/stock/REDEIA-CORPORACION-S-A-29688106/", "fecha": null}}
+    }
+  }
+}
