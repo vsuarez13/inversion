@@ -42,6 +42,28 @@
 
   /* Estado del mercado (aprox., hora de Madrid) */
   const HORARIO = { us: [[15, 30], [22, 0]], eu: [[9, 0], [17, 30]], jp: [[1, 0], [7, 30]], hk: [[2, 30], [9, 0]] };
+  const FESTIVOS = {
+    us: { "2026-11-26": "Acción de Gracias", "2026-12-25": "Navidad", "2027-01-01": "Año Nuevo", "2027-01-18": "Martin Luther King", "2027-02-15": "Día de los Presidentes",
+      "2027-03-26": "Viernes Santo", "2027-05-31": "Memorial Day", "2027-06-18": "Juneteenth", "2027-07-05": "Independencia", "2027-09-06": "Día del Trabajo", "2027-11-25": "Acción de Gracias", "2027-12-24": "Navidad" },
+    eu: { "2026-12-24": "Nochebuena", "2026-12-25": "Navidad", "2026-12-31": "Nochevieja", "2027-01-01": "Año Nuevo", "2027-03-26": "Viernes Santo", "2027-03-29": "Lunes de Pascua", "2027-12-24": "Nochebuena", "2027-12-31": "Nochevieja" }
+  };
+  const MEDIA_SESION = { us: { "2026-11-27": "19:00", "2026-12-24": "19:00", "2027-11-26": "19:00" } };
+  function hoyMadrid() { const a = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Madrid" })); return a; }
+  function iso(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+  // Aviso visible: festivo de hoy, media sesión o datos de una sesión anterior
+  function avisoMercado(bolsa, futuro, ultimoT) {
+    const a = hoyMadrid(), hoy = iso(a), dia = a.getDay();
+    if (!futuro && FESTIVOS[bolsa] && FESTIVOS[bolsa][hoy]) return "Bolsa cerrada hoy (" + FESTIVOS[bolsa][hoy] + "): se muestra la última sesión";
+    if (!futuro && MEDIA_SESION[bolsa] && MEDIA_SESION[bolsa][hoy]) return "Hoy media sesión: cierra a las " + MEDIA_SESION[bolsa][hoy] + " (hora de Madrid)";
+    const h = HORARIO[bolsa];
+    if (!futuro && h && dia >= 1 && dia <= 5 && ultimoT) {
+      const min = a.getHours() * 60 + a.getMinutes(), ab = h[0][0] * 60 + h[0][1] + 60;
+      const dUlt = iso(new Date(new Date(ultimoT * 1000).toLocaleString("en-US", { timeZone: "Europe/Madrid" })));
+      if (min > ab && dUlt < hoy && !(bolsa === "jp" || bolsa === "hk")) return "Sin datos de hoy: puede ser festivo en esa bolsa";
+    }
+    if (dia === 0 || dia === 6) return futuro ? "" : "Fin de semana: se muestra la última sesión";
+    return "";
+  }
   function estadoMercado(bolsa, futuro) {
     if (futuro) return "Futuro · cotiza casi 24 h de domingo a viernes";
     const h = HORARIO[bolsa]; if (!h) return "";
@@ -78,6 +100,21 @@
     ctx.serie = chart.addAreaSeries({ lineColor: col, topColor: col + "55", bottomColor: col + "05", lineWidth: 2, priceLineVisible: false, lastValueVisible: false, crosshairMarkerRadius: 4 });
     ctx.serie.setData(r.puntos.map((p) => ({ time: p[0] + TZ, value: p[1] })));
     if (r.base != null && rango === "sesion") ctx.serie.createPriceLine({ price: base, color: css("--ink2"), lineWidth: 1, lineStyle: 2, axisLabelVisible: false });
+    if (ctx.comp) {
+      const rc = recortar(ctx.comp.datos, rango);
+      if (ctx.serieComp) chart.removeSeries(ctx.serieComp);
+      const ini = r.puntos[0][0], fin = r.puntos[r.puntos.length - 1][0];
+      const pc = rc.puntos.filter((p) => p[0] >= ini - 86400 && p[0] <= fin + 3600);
+      if (pc.length > 1) {
+        const bc = rc.base != null && rango === "sesion" ? rc.base : pc[0][1], k = base / bc;
+        ctx.serieComp = chart.addLineSeries({ color: css("--ink2"), lineWidth: 1.5, lineStyle: 0, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false });
+        ctx.serieComp.setData(pc.map((p) => ({ time: p[0] + TZ, value: p[1] * k })));
+        const retE = (ultimo / base - 1) * 100, retI = (pc[pc.length - 1][1] / bc - 1) * 100;
+        const g = tarjeta.querySelector(".g-comp");
+        g.innerHTML = '<span class="ley e"></span>Este ETF: <b class="' + (retE >= 0 ? "pos" : "neg") + '">' + sg(retE) + nf(Math.abs(retE)) + ' %</b> &nbsp; <span class="ley i"></span>' + ctx.comp.nombre + ' (en euros, misma escala): <b class="' + (retI >= 0 ? "pos" : "neg") + '">' + sg(retI) + nf(Math.abs(retI)) + " %</b> · diferencia " + sg(retE - retI) + nf(Math.abs(retE - retI)) + " puntos";
+        g.hidden = false;
+      }
+    }
     chart.timeScale().fitContent();
     ctx.base = base; ctx.r = r;
     // cabecera
@@ -91,6 +128,8 @@
     c.className = "g-cambio " + (sube ? "pos" : "neg");
     const tUlt = r.puntos[r.puntos.length - 1][0];
     f.textContent = fechaTxt(tUlt, r.intradia);
+    const av = tarjeta.querySelector(".g-aviso");
+    if (av) { const t = avisoMercado(ctx.bolsa, ctx.futuro, datos.ultima_hora || tUlt); av.textContent = t; av.hidden = !t; }
     const viejo = (Date.now() / 1000 - tUlt) > 20 * 3600;
     f.classList.toggle("viejo", viejo);
     f.title = viejo ? "Último dato de una sesión anterior" : "";
@@ -117,8 +156,8 @@
     // Tarjeta pequeña (portada)
     tarjeta(el, cfg) {
       el.innerHTML = '<div class="g-cab"><span class="g-nom">' + cfg.etiqueta + '</span><span class="g-fecha"></span></div>' +
-        '<div class="g-fila"><span class="g-valor">—</span><span class="g-cambio"></span></div><div class="g-orig"></div><div class="g-area"></div><div class="g-tip" hidden></div>';
-      const ctx = { tarjeta: el, rango: cfg.rango || "sesion", estado: estadoMercado(cfg.bolsa, cfg.futuro), esIndice: true };
+        '<div class="g-fila"><span class="g-valor">—</span><span class="g-cambio"></span></div><div class="g-orig"></div><div class="g-aviso" hidden></div><div class="g-area"></div><div class="g-tip" hidden></div>';
+      const ctx = { tarjeta: el, rango: cfg.rango || "sesion", estado: estadoMercado(cfg.bolsa, cfg.futuro), esIndice: true, bolsa: cfg.bolsa, futuro: cfg.futuro };
       return cargar(cfg.id).then((d) => {
         ctx.datos = d;
         ctx.chart = nuevoGrafico(el.querySelector(".g-area"), false);
@@ -129,12 +168,14 @@
     // Gráfico grande con ejes y botones (ficha de empresa)
     grande(el, cfg) {
       el.innerHTML = '<div class="g-cab"><span class="g-nom">' + cfg.etiqueta + '</span><span class="g-fecha"></span></div>' +
-        '<div class="g-fila"><span class="g-valor">—</span><span class="g-cambio"></span></div><div class="g-orig"></div>' +
+        '<div class="g-fila"><span class="g-valor">—</span><span class="g-cambio"></span></div><div class="g-orig"></div><div class="g-aviso" hidden></div><div class="g-comp" hidden></div>' +
         '<div class="g-rangos" role="tablist">' + RANGOS.map(([k, t]) => '<button type="button" data-r="' + k + '"' + (k === "1a" ? ' class="on"' : "") + ">" + t + "</button>").join("") + "</div>" +
         '<div class="g-area grande"></div><div class="g-tip" hidden></div><p class="g-fuente"></p>';
-      const ctx = { tarjeta: el, rango: "1a", estado: "" };
-      return cargar(cfg.id).then((d) => {
+      const ctx = { tarjeta: el, rango: "1a", estado: "", bolsa: cfg.bolsa };
+      const pComp = cfg.comparar ? cargar(cfg.comparar.id).catch(() => null) : Promise.resolve(null);
+      return Promise.all([cargar(cfg.id), pComp]).then(([d, dc]) => {
         ctx.datos = d;
+        if (dc) ctx.comp = { datos: dc, nombre: cfg.comparar.nombre };
         ctx.chart = nuevoGrafico(el.querySelector(".g-area"), true);
         pintarSerie(ctx); tooltip(ctx);
         el.querySelectorAll(".g-rangos button").forEach((b) => b.onclick = () => {

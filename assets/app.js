@@ -293,6 +293,22 @@
     h += "</div>";
     h += '<div class="grafico-empresa g-tarjeta" id="tv-emp"></div>' + enlaceTV(e.tv);
     if (e.notas && e.notas.length) h += '<div class="notas">' + e.notas.map((n) => "<p>" + esc(n) + "</p>").join("") + "</div>";
+    if (e.tipo === "etf") {
+      const x = e.etf || {}, idx = e.indice && UNI ? UNI.indices.find((i) => i.id === e.indice) : null;
+      h += '<section class="grupo"><h2>Datos del ETF</h2><div class="analistas">' +
+        '<div class="kpi"><div class="k">Comisión anual (TER)</div><div class="v">' + (x.ter != null ? nf(x.ter, 2) + " %" : "—") + "</div></div>" +
+        '<div class="kpi"><div class="k">Patrimonio</div><div class="v">' + (x.patrimonio != null ? nf(aEUR(x.patrimonio, e.divisa) / 1000, 2) + " mil M€" : "—") + "</div></div>" +
+        '<div class="kpi"><div class="k">Gestora</div><div class="v" style="font-size:18px">' + esc(x.gestora || "—") + "</div></div>" +
+        '<div class="kpi"><div class="k">Índice que replica</div><div class="v" style="font-size:18px">' + esc(idx ? idx.nombre : (x.categoria || "—")) + "</div></div></div>" +
+        '<p class="meta">Fuente: <a href="' + esc((e.fuentes.yf || {}).url) + '" target="_blank" rel="noopener">Yahoo Finance ↗</a></p></section>';
+      h += '<div class="explica"><h3>¿Por qué tu bróker muestra otra variación que el índice?</h3>' +
+        "<p>El índice se mide desde el cierre oficial de su bolsa (en España, a las 17:30). Trade Republic mide el ETF desde su último precio en LS Exchange, que cotiza hasta las 23:00 y sigue moviéndose con los futuros cuando la bolsa ya ha cerrado. Si el mercado sube o baja por la tarde-noche, el ETF se lo apunta ese mismo día y el índice al día siguiente.</p>" +
+        "<p>En pocos días se compensan: compara periodos de 1 mes o más y verás que el ETF y su índice (línea gris) casi coinciden. La pequeña diferencia restante es la comisión, los dividendos (en los ETF de acumulación) y el tipo de cambio.</p></div>";
+      h += '<div class="fuentes"><h2>Fuentes de esta ficha</h2><ul>' + Object.values(e.fuentes).map((f) => '<li><a href="' + esc(f.url) + '" target="_blank" rel="noopener">' + esc(f.nombre) + "</a>" + (f.fecha ? " · " + esc(fechaFuente(f)) : "") + "</li>").join("") + "</ul></div>";
+      h += botonesGitHub(e.isin, e.nombre, "actualizar");
+      $("#empresa").innerHTML = h;
+      return trasPintar(e);
+    }
     h += '<div class="sector-caja"><h3>Cómo se valora este sector: ' + esc(sec.nombre) + "</h3><p>" + esc(sec.claves) + "</p>" +
       (sec.ref ? "<p>Referencia (mediana en EE. UU., Damodaran, enero 2026): " + (sec.ref.ev_ebitda ? "EV/EBITDA " + nf(sec.ref.ev_ebitda, 1) + "x" : "") + (sec.ref.per_fwd ? " · PER forward " + nf(sec.ref.per_fwd, 1) + "x" : "") + ' (' + esc(sec.ref.damodaran) + ') · <a href="' + esc(SECT.fuente_referencia.url_ev_ebitda) + '" target="_blank" rel="noopener">Fuente ↗</a></p>' : "") +
       "<p>" + esc(SECT.nota) + "</p></div>";
@@ -346,7 +362,12 @@
     if (e.origen === "finnhub") h = h.replace('<div class="acciones">', '<div class="acciones"><button type="button" class="btn sec" id="refrescar">Refrescar datos</button>');
 
     $("#empresa").innerHTML = h;
-    Grafico.grande($("#tv-emp"), { id: e.isin, etiqueta: esc(e.nombre) }).then((ok) => {
+    trasPintar(e);
+  }
+  function trasPintar(e) {
+    const bolsaDe = (c) => ({ US: "us", JP: "jp", HK: "hk" })[c] || "eu";
+    const idx = e.indice && UNI ? UNI.indices.find((i) => i.id === e.indice) : null;
+    Grafico.grande($("#tv-emp"), { id: e.isin, etiqueta: esc(e.nombre), bolsa: bolsaDe((e.isin || "").slice(0, 2)), comparar: idx ? { id: idx.id, nombre: esc(idx.nombre) } : null }).then((ok) => {
       if (!ok) $("#tv-emp").innerHTML = e.origen === "finnhub"
         ? '<div class="g-sin"><p>Esta empresa aún no está en tu base, así que no tiene gráfico. Guárdala y en unos 3 minutos tendrás aquí su gráfico en euros (recarga la página).</p>' + botonGuardar(e.isin, e.nombre) + '<p class="meta">Se abrirá GitHub con la petición ya escrita: solo tienes que pulsar «Create» (o «Submit new issue»).</p></div>'
         : '<p class="g-sin">El gráfico se genera en la próxima actualización de datos (cada 30 min).</p>';

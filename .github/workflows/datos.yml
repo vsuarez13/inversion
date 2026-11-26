@@ -3,7 +3,12 @@ name: Datos de la web
 on:
   schedule:
     - cron: "*/30 * * * *"   # precios cada 30 minutos (GitHub puede retrasarlo unos minutos)
-  workflow_dispatch: {}        # botón "Run workflow" para actualizar a mano
+  workflow_dispatch:           # botón "Run workflow" para actualizar a mano (opcional: ISIN a añadir)
+    inputs:
+      isin:
+        description: "ISIN a añadir (opcional)"
+        required: false
+        default: ""
   issues:
     types: [opened]            # peticiones "Añadir a mi base" desde la web
 
@@ -27,9 +32,10 @@ jobs:
       - run: pip install --quiet yfinance
 
       - name: Añadir empresa pedida
-        if: github.event_name == 'issues'
+        if: github.event_name == 'issues' || (github.event_name == 'workflow_dispatch' && github.event.inputs.isin != '')
         env:
           TITULO: ${{ github.event.issue.title }}
+          ISIN_MANUAL: ${{ github.event.inputs.isin }}
         run: python scripts/anadir_empresa.py
 
       - name: Actualizar precios
@@ -50,5 +56,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NUM: ${{ github.event.issue.number }}
         run: |
-          if [ -f resultado.txt ]; then gh issue comment "$NUM" --body "$(cat resultado.txt)"; fi
-          if grep -q "Ficha automática creada" resultado.txt 2>/dev/null; then gh issue close "$NUM"; fi
+          # Sin comentarios para no generar correos: solo se cierra la petición si salió bien
+          cat resultado.txt 2>/dev/null || true
+          if grep -q "Ficha automática creada" resultado.txt 2>/dev/null; then gh issue close "$NUM" --reason completed; fi

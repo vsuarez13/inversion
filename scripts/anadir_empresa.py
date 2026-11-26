@@ -50,7 +50,7 @@ def num(v, factor=1.0):
 
 def buscar_simbolo(isin):
     res = yf.Search(isin, max_results=10).quotes or []
-    acciones = [q for q in res if q.get("quoteType") in ("EQUITY", None)] or res
+    acciones = [q for q in res if q.get("quoteType") in ("EQUITY", "ETF", "MUTUALFUND", None)] or res
     if not acciones:
         return None, None
     pais = isin[:2]
@@ -64,8 +64,33 @@ def buscar_simbolo(isin):
     return elegido["symbol"], elegido
 
 
+INDICES = [("ibex", "ibex35"), ("s&p 500", "sp500"), ("s&p500", "sp500"), ("nasdaq", "nasdaq100"), ("stoxx 50", "eurostoxx50"),
+           ("stoxx50", "eurostoxx50"), ("dax", "dax"), ("nikkei", "nikkei225"), ("hang seng", "hangseng")]
+
+
+def ficha_etf(isin, sym, info):
+    hoy = date.today().isoformat()
+    nombre = info.get("longName") or info.get("shortName") or sym
+    n = nombre.lower()
+    indice = next((v for k, v in INDICES if k in n), None)
+    ter = info.get("netExpenseRatio") or info.get("annualReportExpenseRatio")
+    return {
+        "tipo": "etf", "nombre": nombre, "ticker": sym.split(".")[0], "yahoo": sym, "bolsa": info.get("fullExchangeName") or info.get("exchange") or "",
+        "tv": sym.split(".")[0], "pais": isin[:2], "divisa": info.get("currency") or "", "sector": "general", "descripcion": "",
+        "indice": indice, "precio": {"v": num(info.get("regularMarketPrice") or info.get("navPrice")), "fecha": hoy, "fuente": "yf"},
+        "etf": {"ter": num(ter), "patrimonio": num(info.get("totalAssets"), 1e-6), "categoria": info.get("category") or "",
+                "gestora": info.get("fundFamily") or "", "rent_ytd": num(info.get("ytdReturn"), 100 if (info.get("ytdReturn") or 0) < 1 else 1)},
+        "ratios": {}, "analistas": None,
+        "notas": ["Ficha automática de ETF con datos de Yahoo Finance."],
+        "fuentes": {"yf": {"nombre": "Yahoo Finance · ficha del ETF (automática)", "url": "https://finance.yahoo.com/quote/" + sym, "fecha": hoy}},
+        "automatica": True,
+    }
+
+
 def ficha(isin, sym):
     info = yf.Ticker(sym).info or {}
+    if (info.get("quoteType") or "").upper() in ("ETF", "MUTUALFUND"):
+        return ficha_etf(isin, sym, info)
     hoy = date.today().isoformat()
     deuda, ebitda = num(info.get("totalDebt")), num(info.get("ebitda"))
     rec = {"strong_buy": "Compra fuerte", "buy": "Comprar", "hold": "Mantener", "sell": "Vender", "strong_sell": "Venta fuerte",
@@ -103,7 +128,7 @@ def ficha(isin, sym):
 
 
 def main():
-    titulo = os.environ.get("TITULO", "")
+    titulo = os.environ.get("TITULO", "") or ("Añadir: " + os.environ.get("ISIN_MANUAL", ""))
     m = re.search(r"\b([A-Z]{2}[A-Z0-9]{9}[0-9])\b", titulo.upper())
     res = os.path.join(RAIZ, "resultado.txt")
     if not m or not isin_valido(m.group(1)):
