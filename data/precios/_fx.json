@@ -1,16 +1,16 @@
 {
- "actualizado": "2026-11-26T23:10:33+00:00",
+ "actualizado": "2026-11-26T23:29:18+00:00",
  "eur_a": {
   "USD": 1.0973,
   "GBP": 0.837,
-  "JPY": 174.713,
-  "HKD": 8.596,
+  "JPY": 174.719,
+  "HKD": 8.5965,
   "CHF": 0.9153,
-  "SEK": 11.1937,
+  "SEK": 11.1941,
   "DKK": 7.4737,
-  "NOK": 10.7004,
-  "CAD": 1.5626,
-  "AUD": 1.6537
+  "NOK": 10.7042,
+  "CAD": 1.5629,
+  "AUD": 1.6538
  },
  "nota": "Unidades de cada moneda por 1 euro (Yahoo Finance)"
 }
