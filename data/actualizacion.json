@@ -1,7 +1,7 @@
 {
- "fecha": "2026-11-27T00:20:00+01:00",
+ "fecha": "2026-11-27T00:05:00+01:00",
  "tipo": "Actualización",
- "resumen": "Gráficos nuevos estilo Financial Hub (periodos, mercado/futuros, información al pasar el ratón), también en las fichas. «Añadir a mi base» ahora crea la ficha automáticamente en unos minutos.",
+ "resumen": "Todo en euros: índices, empresas, capitalización y precios objetivo (con el valor original al lado). Botón «Guardar en mi base» visible junto al precio y en el gráfico.",
  "actualizadas": [],
  "nuevas": []
 }

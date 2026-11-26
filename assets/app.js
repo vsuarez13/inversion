@@ -180,6 +180,12 @@
     const base = DB.empresas[isin];
     if (base) {
       const e = Object.assign({ origen: "base", isin, fuenteRatios: base.precio && base.precio.fuente }, base);
+      e.fuentes = Object.assign({}, base.fuentes);
+      try {
+        const d = await Grafico.cargar(isin);
+        e.precio = { v: d.ultimo_original, v_eur: d.ultimo, moneda: d.moneda_original, fecha: d.actualizado, fuente: "yfp", cambio_pct: d.cierre_anterior ? (d.ultimo / d.cierre_anterior - 1) * 100 : null };
+        e.fuentes.yfp = { nombre: "Yahoo Finance · cotización (actualizada cada 30 min)", url: d.url, fecha: d.actualizado, vivo: true };
+      } catch (err) { /* sin precio actualizado: se usa el de la ficha */ }
       guardarReciente(isin, e.nombre);
       return pintar(e);
     }
@@ -272,9 +278,10 @@
     h += "</div>";
     if (e.precio) {
       const p = e.precio, fp = e.fuentes[p.fuente] || {};
-      const pe = aEUR(p.v, e.divisa), esEUR = (e.divisa || "EUR") === "EUR";
+      const pe = p.v_eur != null ? p.v_eur : aEUR(p.v, e.divisa), esEUR = (e.divisa || "EUR") === "EUR";
       h += '<div class="e-precio"><div class="peq">Precio en euros</div><div class="grande">' + (pe != null ? nf(pe, 2) + " €" : nf(p.v, 2) + " " + esc(e.divisa)) + "</div>";
-      if (!esEUR && pe != null) h += '<div class="peq">' + nf(p.v, 2) + " " + esc(e.divisa) + " en su bolsa · cambio EUR/" + esc(e.divisa === "GBp" ? "GBP" : e.divisa) + " " + nf(FXR[e.divisa === "GBp" ? "GBP" : e.divisa], 4) + " (Yahoo Finance)</div>";
+      const mon = p.moneda || e.divisa;
+      if (!esEUR && pe != null) h += '<div class="peq">' + nf(p.v, 2) + " " + esc(mon === "GBp" ? "peniques (GBp)" : mon) + " en su bolsa · cambio EUR/" + esc(e.divisa === "GBp" ? "GBP" : e.divisa) + " " + nf(FXR[e.divisa === "GBp" ? "GBP" : e.divisa], 4) + " (Yahoo Finance)</div>";
       if (p.cambio_pct != null) h += '<div class="cambio ' + (p.cambio_pct >= 0 ? "pos" : "neg") + '">' + (p.cambio_pct >= 0 ? "+" : "") + nf(p.cambio_pct, 2) + " % hoy</div>";
       h += '<div class="peq">' + (fp.vivo ? "Consultado el " + esc(new Date(p.fecha).toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short" })) : "Precio del " + esc(fechaES(p.fecha)) + (p.nota ? " (" + esc(p.nota) + ")" : "") + ". El gráfico de abajo se actualiza cada 30 min.") +
         ' · <a href="' + esc(fp.url) + '" target="_blank" rel="noopener">Fuente ↗</a></div>';
