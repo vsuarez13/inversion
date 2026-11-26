@@ -34,17 +34,21 @@ def serie(df):
 
 def descargar(simbolo):
     t = yf.Ticker(simbolo)
-    diario = serie(t.history(period="10y", interval="1d", auto_adjust=False))
+    df_d = t.history(period="10y", interval="1d", auto_adjust=False)
+    diario = serie(df_d)
     if not diario:
         raise RuntimeError("sin datos diarios")
-    intradia = serie(t.history(period="1d", interval="5m", prepost=False))
+    df_i = t.history(period="1d", interval="5m", prepost=False)
+    intradia = serie(df_i)
     semana = serie(t.history(period="5d", interval="30m", prepost=False))
     ultimo = intradia[-1][1] if intradia else diario[-1][1]
     ultima_hora = intradia[-1][0] if intradia else diario[-1][0]
-    # cierre anterior: último cierre diario de un día anterior al de la sesión mostrada
-    dia_sesion = datetime.fromtimestamp(ultima_hora, timezone.utc).date()
-    previos = [p for p in diario if datetime.fromtimestamp(p[0], timezone.utc).date() < dia_sesion]
-    cierre_anterior = previos[-1][1] if previos else (diario[-2][1] if len(diario) > 1 else None)
+    # cierre anterior: último cierre diario de un día anterior al de la sesión, en la hora local de la bolsa
+    tz = df_d.index.tz
+    dia_sesion = (df_i.index[-1] if not df_i.empty else df_d.index[-1]).tz_convert(tz).date()
+    cierres = [(ts.date(), float(c)) for ts, c in df_d["Close"].dropna().items()]
+    previos = [c for d, c in cierres if d < dia_sesion]
+    cierre_anterior = round(previos[-1], 4) if previos else None
     divisa = None
     try:
         divisa = t.fast_info.get("currency")
