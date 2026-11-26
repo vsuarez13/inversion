@@ -1,7 +1,9 @@
 {
-  "fecha": "2026-11-26T23:30:00+01:00",
-  "tipo": "Primera versión",
-  "resumen": "Web creada: índices en vivo, buscador por ISIN y 5 fichas europeas (Indra, Vetoquinol, Genus, Veolia, Redeia). Las empresas de EE. UU. se cargan en vivo desde Finnhub.",
-  "actualizadas": [],
-  "nuevas": ["Indra Sistemas", "Vetoquinol", "Genus", "Veolia Environnement", "Redeia Corporación"]
+ "fecha": "2026-11-26T23:45:00+01:00",
+ "tipo": "Actualización",
+ "resumen": "Nueva ficha: TotalEnergies (pedida desde la web). Modo oscuro y gráfico del Euro Stoxx 50 corregido.",
+ "actualizadas": [],
+ "nuevas": [
+  "TotalEnergies"
+ ]
 }

@@ -10,7 +10,7 @@ window.CONFIG = {
   indices: [
     { nombre: "S&P 500", pais: "EE. UU.", tv: "FOREXCOM:SPXUSD" },
     { nombre: "Nasdaq-100", pais: "EE. UU.", tv: "FOREXCOM:NSXUSD" },
-    { nombre: "Euro Stoxx 50", pais: "Zona euro", tv: "FOREXCOM:EUSTX50" },
+    { nombre: "Euro Stoxx 50", pais: "Zona euro", tv: "TVC:SX5E" },
     { nombre: "IBEX 35", pais: "España", tv: "BME:IBC" },
     { nombre: "DAX", pais: "Alemania", tv: "FOREXCOM:GRXEUR" },
     { nombre: "Nikkei 225", pais: "Japón", tv: "FOREXCOM:JPXJPY" },

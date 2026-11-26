@@ -4,7 +4,7 @@
   const C = window.CONFIG || {};
   const $ = (s, el = document) => el.querySelector(s);
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const oscuro = () => window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const oscuro = () => true; // la web usa siempre modo oscuro
   const nf = (n, d = 2) => (n == null || isNaN(n) ? null : new Intl.NumberFormat("es-ES", { minimumFractionDigits: d, maximumFractionDigits: d }).format(n));
   const fechaES = (s) => { if (!s) return ""; const d = new Date(s.length === 10 ? s + "T12:00:00" : s); return isNaN(d) ? s : d.toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "numeric" }); };
   const ahoraES = () => new Date().toLocaleString("es-ES", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
@@ -62,7 +62,7 @@
     if (!portadaLista) {
       widget($("#tv-cinta"), "embed-widget-ticker-tape.js", { symbols: (C.indices || []).map((i) => ({ proName: i.tv, title: i.nombre })), showSymbolLogo: false, displayMode: "adaptive" });
       $("#indices").innerHTML = (C.indices || []).map((i, n) =>
-        '<article class="indice"><div class="indice-cab"><b>' + esc(i.nombre) + "</b><span>" + esc(i.pais) + '</span></div><div class="tradingview-widget-container" id="tv-i' + n + '"></div></article>').join("");
+        '<article class="indice"><div class="indice-cab"><b>' + esc(i.nombre) + "</b><span>" + esc(i.pais) + '</span></div><div class="tradingview-widget-container" id="tv-i' + n + '"></div><a class="tv-link" href="https://www.tradingview.com/symbols/' + esc(i.tv.replace(":", "-")) + '/" target="_blank" rel="noopener">Abrir en TradingView ↗</a></article>').join("");
       (C.indices || []).forEach((i, n) => widget($("#tv-i" + n), "embed-widget-mini-symbol-overview.js", { symbol: i.tv, width: "100%", height: "100%", dateRange: "1M", autosize: true, chartOnly: false, noTimeScale: false }));
       portadaLista = true;
     }
@@ -186,11 +186,14 @@
     $("#empresa").innerHTML = '<a class="volver" href="#/">← Volver</a><h1 class="tit">' + esc(r.description) + "</h1>" +
       '<p class="e-meta"><span>ISIN <b>' + esc(isin) + "</b></span><span>Ticker <b>" + esc(r.symbol) + "</b></span></p>" +
       '<div class="notas"><p><b>Ficha pendiente.</b> Esta empresa todavía no está en tu base y el plan gratuito de Finnhub no da ratios de empresas fuera de EE. UU. Pulsa «Añadir a mi base» y la incorporaré con sus ratios, analistas y fuentes en la próxima actualización.</p></div>' +
-      '<div class="grafico-empresa tradingview-widget-container" id="tv-emp"></div>' + botonesGitHub(isin, r.description) +
+      '<div class="grafico-empresa tradingview-widget-container" id="tv-emp"></div>' + enlaceTV(tv) + botonesGitHub(isin, r.description) +
       '<div class="fuentes"><h2>Fuentes</h2><ul><li><a href="https://finnhub.io/" rel="noopener" target="_blank">Finnhub</a>: identificación por ISIN, consultado el ' + esc(ahoraES()) + '.</li><li><a href="https://www.tradingview.com/symbols/' + esc(tv.replace(":", "-")) + '/" rel="noopener" target="_blank">TradingView</a>: gráfico en vivo.</li></ul></div>';
     widget($("#tv-emp"), "embed-widget-symbol-overview.js", simbolosCfg(r.description, tv));
   }
 
+  function enlaceTV(tv) {
+    return '<p class="meta">Si el gráfico no aparece, TradingView no permite mostrar esta bolsa fuera de su web: <a href="https://www.tradingview.com/symbols/' + esc(String(tv).replace(":", "-")) + '/" target="_blank" rel="noopener">ábrelo en TradingView ↗</a></p>';
+  }
   function simbolosCfg(nombre, tv) {
     return { symbols: [[nombre, tv + "|12M"]], chartOnly: false, width: "100%", height: "100%", autosize: true, showVolume: false, hideDateRanges: false, scalePosition: "right", scaleMode: "Normal", chartType: "area", dateRanges: ["1d|1", "1m|30", "3m|60", "12m|1D", "60m|1W", "all|1M"] };
   }
@@ -245,7 +248,7 @@
       h += "</div>";
     }
     h += "</div>";
-    h += '<div class="grafico-empresa tradingview-widget-container" id="tv-emp"></div>';
+    h += '<div class="grafico-empresa tradingview-widget-container" id="tv-emp"></div>' + enlaceTV(e.tv);
     if (e.notas && e.notas.length) h += '<div class="notas">' + e.notas.map((n) => "<p>" + esc(n) + "</p>").join("") + "</div>";
     h += '<div class="sector-caja"><h3>Cómo se valora este sector: ' + esc(sec.nombre) + "</h3><p>" + esc(sec.claves) + "</p>" +
       (sec.ref ? "<p>Referencia (mediana en EE. UU., Damodaran, enero 2026): " + (sec.ref.ev_ebitda ? "EV/EBITDA " + nf(sec.ref.ev_ebitda, 1) + "x" : "") + (sec.ref.per_fwd ? " · PER forward " + nf(sec.ref.per_fwd, 1) + "x" : "") + ' (' + esc(sec.ref.damodaran) + ') · <a href="' + esc(SECT.fuente_referencia.url_ev_ebitda) + '" target="_blank" rel="noopener">Fuente ↗</a></p>' : "") +
