@@ -61,60 +61,38 @@
    "automatica": true
   },
   "FR0010655746": {
+   "tipo": "etf",
    "nombre": "Amundi IBEX 35 UCITS ETF Acc",
    "ticker": "CS1",
    "yahoo": "CS1.PA",
    "bolsa": "Paris",
-   "tv": "EURONEXT:CS1",
+   "tv": "CS1",
    "pais": "FR",
    "divisa": "EUR",
    "sector": "general",
-   "industria": "",
    "descripcion": "",
+   "indice": "ibex35",
    "precio": {
     "v": 495.6,
     "fecha": "2026-11-26",
     "fuente": "yf"
    },
-   "ratios": {
-    "cap_bursatil": null,
-    "ev": null,
-    "per_ttm": 16.9097,
-    "per_fwd": null,
-    "peg": null,
-    "ev_ebitda": null,
-    "ev_ventas": null,
-    "p_ventas": null,
-    "p_vc": null,
-    "deuda_ebitda": null,
-    "deuda_patrimonio": null,
-    "liquidez": null,
-    "margen_bruto": null,
-    "margen_operativo": null,
-    "margen_ebitda": null,
-    "margen_neto": null,
-    "margen_fcf": null,
-    "roe": null,
-    "roic": null,
-    "rent_dividendo": null,
-    "payout": null,
-    "beta": null,
-    "var_52s": null
+   "etf": {
+    "ter": 0.3,
+    "patrimonio": 877.3169,
+    "categoria": "",
+    "gestora": "Amundi Asset Management",
+    "rent_ytd": 10.6664
    },
-   "analistas": {
-    "consenso": "Sin dato",
-    "n": 0,
-    "objetivo": null,
-    "potencial": null,
-    "fuente": "yf"
-   },
+   "ratios": {},
+   "analistas": null,
    "notas": [
-    "Ficha automática con datos de Yahoo Finance, sin revisar todavía. En la próxima revisión la contrasto con otras fuentes y añado comentarios."
+    "Ficha automática de ETF con datos de Yahoo Finance."
    ],
    "fuentes": {
     "yf": {
-     "nombre": "Yahoo Finance · estadísticas (ficha automática)",
-     "url": "https://finance.yahoo.com/quote/CS1.PA/key-statistics",
+     "nombre": "Yahoo Finance · ficha del ETF (automática)",
+     "url": "https://finance.yahoo.com/quote/CS1.PA",
      "fecha": "2026-11-26"
     }
    },
