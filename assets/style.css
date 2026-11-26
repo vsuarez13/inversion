@@ -149,3 +149,31 @@ details.mas p{font-size:13.5px;color:var(--ink2);margin:6px 0 0}
   .grafico-empresa{height:300px}
   .indice .tradingview-widget-container{height:200px}
 }
+
+/* Gráficos propios */
+.controles{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:4px 0 6px}
+.g-rangos{display:inline-flex;flex-wrap:wrap;gap:2px;padding:3px;border:1px solid var(--line);border-radius:12px;background:#1f1e1d}
+.g-rangos button{font:500 13.5px/1 var(--font);color:var(--ink2);background:none;border:0;border-radius:9px;padding:8px 11px;cursor:pointer}
+.g-rangos button:hover{color:var(--ink)}
+.g-rangos button.on{background:var(--ink);color:#1f1e1d}
+.hint{color:var(--ink2);opacity:.75;font-size:13px;max-width:80ch;margin:4px 0 10px}
+.indices{grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr))}
+.g-tarjeta{position:relative;border:1px solid var(--line);border-radius:var(--r);background:var(--panel);padding:12px 14px 8px}
+.g-cab{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px}
+.g-nom{font-weight:600}
+.g-nom .pais{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 5px;border-radius:4px;background:var(--bg);color:var(--ink2);margin-right:4px;vertical-align:1px}
+.g-nom .fut{font-size:11px;font-weight:500;color:var(--acc)}
+.g-fecha{font-size:12px;color:var(--ink2);white-space:nowrap}
+.g-fecha.viejo{color:#e0a35c;background:color-mix(in srgb,#e0a35c 15%,transparent);padding:2px 6px;border-radius:5px}
+.g-fila{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;margin:4px 0 2px}
+.g-valor{font:600 24px/1.1 var(--disp);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.g-cambio{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.g-cambio.pos,.g-tip .pos{color:var(--pos)}.g-cambio.neg,.g-tip .neg{color:var(--neg)}
+.g-area{height:110px;margin:0 -6px}
+.g-area.grande{height:340px;margin:10px 0 0}
+.g-tip{position:absolute;top:44px;z-index:5;pointer-events:none;background:#1f1e1d;border:1px solid var(--line);border-radius:8px;padding:7px 9px;font-size:12.5px;line-height:1.45;white-space:nowrap;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.g-tip span{color:var(--ink2)}
+.g-sin{color:var(--ink2);font-size:14px;padding:24px 0;margin:0;text-align:center}
+.g-fuente{font-size:12.5px;color:var(--ink2);margin:6px 0 0}
+.grafico-empresa.g-tarjeta{height:auto;overflow:visible;padding:14px 16px}
+.grafico-empresa .g-rangos{margin-top:8px}

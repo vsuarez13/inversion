@@ -1,0 +1,60 @@
+{
+ "indices": [
+  {
+   "id": "sp500",
+   "nombre": "S&P 500",
+   "pais": "US",
+   "mercado": "^GSPC",
+   "futuro": "ES=F",
+   "bolsa": "us"
+  },
+  {
+   "id": "nasdaq100",
+   "nombre": "Nasdaq 100",
+   "pais": "US",
+   "mercado": "^NDX",
+   "futuro": "NQ=F",
+   "bolsa": "us"
+  },
+  {
+   "id": "eurostoxx50",
+   "nombre": "Euro Stoxx 50",
+   "pais": "EU",
+   "mercado": "^STOXX50E",
+   "futuro": null,
+   "bolsa": "eu"
+  },
+  {
+   "id": "ibex35",
+   "nombre": "IBEX 35",
+   "pais": "ES",
+   "mercado": "^IBEX",
+   "futuro": null,
+   "bolsa": "eu"
+  },
+  {
+   "id": "dax",
+   "nombre": "DAX",
+   "pais": "DE",
+   "mercado": "^GDAXI",
+   "futuro": null,
+   "bolsa": "eu"
+  },
+  {
+   "id": "nikkei225",
+   "nombre": "Nikkei 225",
+   "pais": "JP",
+   "mercado": "^N225",
+   "futuro": "NIY=F",
+   "bolsa": "jp"
+  },
+  {
+   "id": "hangseng",
+   "nombre": "Hang Seng",
+   "pais": "HK",
+   "mercado": "^HSI",
+   "futuro": null,
+   "bolsa": "hk"
+  }
+ ]
+}

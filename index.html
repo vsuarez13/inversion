@@ -40,13 +40,19 @@
       <div id="base-lista" class="base-lista"></div>
     </div>
 
-    <div class="cinta"><div class="tradingview-widget-container" id="tv-cinta"></div></div>
-
     <div class="wrap">
       <div class="sec-cab">
-        <h2>Índices principales</h2>
+        <h2>Índices de referencia</h2>
         <p class="meta" id="meta-indices"></p>
       </div>
+      <div class="controles">
+        <div class="g-rangos" id="rangos" role="tablist" aria-label="Periodo"></div>
+        <div class="g-rangos" id="modo" role="tablist" aria-label="Mercado o futuros">
+          <button type="button" data-m="mercado" class="on">Mercado</button>
+          <button type="button" data-m="futuro">Futuros</button>
+        </div>
+      </div>
+      <p class="hint" id="hint-futuros" hidden>Futuros: contratos sobre el índice que cotizan casi 24 horas. Sirven para ver cómo se mueve el mercado fuera del horario de la bolsa y anticipan la apertura. Solo hay futuros gratuitos para S&amp;P 500, Nasdaq 100 y Nikkei 225; el resto muestra el índice.</p>
       <div class="indices" id="indices"></div>
     </div>
   </section>
@@ -88,11 +94,13 @@
 
 <footer class="pie">
   <div class="wrap">
-    <p>Uso personal. No es asesoramiento financiero. Cotizaciones y gráficos: <a href="https://www.tradingview.com/" rel="noopener">TradingView</a>. Datos de empresas de EE. UU.: <a href="https://finnhub.io/" rel="noopener">Finnhub</a>. Fichas europeas: base propia con la fuente de cada dato.</p>
+    <p>Uso personal. No es asesoramiento financiero. Precios: Yahoo Finance, actualizados cada 30 min. Gráficos hechos con <a href="https://www.tradingview.com/lightweight-charts/" rel="noopener">Lightweight Charts de TradingView</a>. Datos de empresas de EE. UU.: <a href="https://finnhub.io/" rel="noopener">Finnhub</a>. Fichas europeas: base propia con la fuente de cada dato.</p>
   </div>
 </footer>
 
+<script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <script src="assets/config.js"></script>
+<script src="assets/graficos.js"></script>
 <script src="assets/app.js"></script>
 </body>
 </html>

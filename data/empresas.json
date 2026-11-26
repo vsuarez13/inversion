@@ -62,7 +62,8 @@
      "url": "https://uk.marketscreener.com/quote/stock/INDRA-SISTEMAS-S-A-413470/valuation/",
      "fecha": null
     }
-   }
+   },
+   "yahoo": "IDR.MC"
   },
   "FR0004186856": {
    "nombre": "Vetoquinol",
@@ -126,7 +127,8 @@
      "url": "https://www.abcbourse.com/marches/vetoquinol-affiche-une-croissance-de-10-4-de-son-chiffre-daffaires-au-troisiem_705078",
      "fecha": null
     }
-   }
+   },
+   "yahoo": "VETO.PA"
   },
   "GB0002074580": {
    "nombre": "Genus",
@@ -191,7 +193,8 @@
      "url": "https://www.investegate.co.uk/announcement/rns/genus--gns/preliminary-results/9764361",
      "fecha": "2026-09-10"
     }
-   }
+   },
+   "yahoo": "GNS.L"
   },
   "FR0000124141": {
    "nombre": "Veolia Environnement",
@@ -254,7 +257,8 @@
      "url": "https://uk.marketscreener.com/quote/stock/VEOLIA-ENVIRONNEMENT-4726/finances/",
      "fecha": null
     }
-   }
+   },
+   "yahoo": "VIE.PA"
   },
   "ES0173093024": {
    "nombre": "Redeia Corporación",
@@ -318,7 +322,8 @@
      "url": "https://uk.marketscreener.com/quote/stock/REDEIA-CORPORACION-S-A-29688106/",
      "fecha": null
     }
-   }
+   },
+   "yahoo": "RED.MC"
   },
   "FR0000120271": {
    "nombre": "TotalEnergies",
@@ -383,7 +388,8 @@
      "url": "https://ca.marketscreener.com/quote/stock/TOTALENERGIES-SE-200329062/finances/",
      "fecha": null
     }
-   }
+   },
+   "yahoo": "TTE.PA"
   }
  }
 }

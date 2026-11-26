@@ -10,12 +10,14 @@
   const ahoraES = () => new Date().toLocaleString("es-ES", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
   const store = { get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
 
-  let DB = null, RATIOS = null, SECT = null;
+  let DB = null, RATIOS = null, SECT = null, UNI = null;
   const cargarDatos = Promise.all([
     fetch("data/empresas.json").then((r) => r.json()),
     fetch("data/ratios.json").then((r) => r.json()),
-    fetch("data/sectores.json").then((r) => r.json())
-  ]).then(([e, r, s]) => { DB = e; RATIOS = r; SECT = s; });
+    fetch("data/sectores.json").then((r) => r.json()),
+    fetch("data/empresas_auto.json", { cache: "no-store" }).then((r) => r.json()).catch(() => ({ empresas: {} })),
+    fetch("data/universo.json").then((r) => r.json())
+  ]).then(([e, r, s, a, u]) => { DB = e; RATIOS = r; SECT = s; UNI = u; Object.keys(a.empresas || {}).forEach((k) => { if (!DB.empresas[k]) DB.empresas[k] = a.empresas[k]; }); });
 
   /* ---------- Validación de ISIN (dígito de control) ---------- */
   function isinValido(isin) {
@@ -55,21 +57,33 @@
   }
 
   /* ---------- Portada ---------- */
-  let portadaLista = false;
+  let portadaLista = false, tarjetas = [], rangoAct = store.get("rango", "sesion"), modoAct = "mercado";
   function portada() {
-    const hora = ahoraES();
-    $("#meta-indices").textContent = "Gráficos en vivo de TradingView (algunos índices con unos 15 min de retraso según la bolsa) · página cargada el " + hora;
-    if (!portadaLista) {
-      widget($("#tv-cinta"), "embed-widget-ticker-tape.js", { symbols: (C.indices || []).map((i) => ({ proName: i.tv, title: i.nombre })), showSymbolLogo: false, displayMode: "adaptive" });
-      $("#indices").innerHTML = (C.indices || []).map((i, n) =>
-        '<article class="indice"><div class="indice-cab"><b>' + esc(i.nombre) + "</b><span>" + esc(i.pais) + '</span></div><div class="tradingview-widget-container" id="tv-i' + n + '"></div><a class="tv-link" href="https://www.tradingview.com/symbols/' + esc(i.tv.replace(":", "-")) + '/" target="_blank" rel="noopener">Abrir en TradingView ↗</a></article>').join("");
-      (C.indices || []).forEach((i, n) => widget($("#tv-i" + n), "embed-widget-mini-symbol-overview.js", { symbol: i.tv, width: "100%", height: "100%", dateRange: "1M", autosize: true, chartOnly: false, noTimeScale: false }));
-      portadaLista = true;
-    }
     recientes();
     cargarDatos.then(() => {
       const emp = DB.empresas;
       $("#base-lista").innerHTML = "<span>En tu base:</span>" + Object.keys(emp).map((k) => '<a class="chip" href="#/empresa/' + k + '">' + esc(emp[k].nombre) + "</a>").join("");
+      if (portadaLista) return;
+      portadaLista = true;
+      $("#rangos").innerHTML = Grafico.RANGOS.map(([k, t]) => '<button type="button" data-r="' + k + '"' + (k === rangoAct ? ' class="on"' : "") + ">" + t + "</button>").join("");
+      $("#rangos").onclick = (ev) => { const b = ev.target.closest("button"); if (!b) return; rangoAct = b.dataset.r; store.set("rango", rangoAct); marcar("#rangos", b); tarjetas.forEach((t) => t.then((g) => g.rango(rangoAct))); };
+      $("#modo").onclick = (ev) => { const b = ev.target.closest("button"); if (!b) return; modoAct = b.dataset.m; marcar("#modo", b); $("#hint-futuros").hidden = modoAct !== "futuro"; pintarIndices(); };
+      $("#modo").onmouseenter = () => { $("#hint-futuros").hidden = false; };
+      $("#modo").onmouseleave = () => { $("#hint-futuros").hidden = modoAct !== "futuro"; };
+      pintarIndices();
+      fetch("data/precios/_estado.json", { cache: "no-store" }).then((r) => r.json()).then((e) => {
+        $("#meta-indices").textContent = "Datos: Yahoo Finance · última actualización " + new Date(e.actualizado).toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short" }) + " (cada 30 min; retraso de unos 15 min según la bolsa)";
+      }).catch(() => { $("#meta-indices").textContent = "Los datos se están generando: aparecerán en unos minutos."; });
+    });
+  }
+  function marcar(sel, b) { document.querySelectorAll(sel + " button").forEach((x) => x.classList.toggle("on", x === b)); }
+  function pintarIndices() {
+    const cont = $("#indices");
+    cont.innerHTML = UNI.indices.map((i, n) => '<article class="indice g-tarjeta" id="g-' + n + '"></article>').join("");
+    tarjetas = UNI.indices.map((i, n) => {
+      const fut = modoAct === "futuro" && i.futuro;
+      const etiqueta = '<span class="pais">' + esc(i.pais) + "</span> " + esc(i.nombre) + (fut ? ' <span class="fut">futuro</span>' : "");
+      return Grafico.tarjeta($("#g-" + n), { id: fut ? i.id + "_fut" : i.id, etiqueta, rango: rangoAct, bolsa: i.bolsa, futuro: !!fut });
     });
   }
   function recientes() {
@@ -185,14 +199,14 @@
     const tv = tvDesdeSimbolo(r.symbol);
     $("#empresa").innerHTML = '<a class="volver" href="#/">← Volver</a><h1 class="tit">' + esc(r.description) + "</h1>" +
       '<p class="e-meta"><span>ISIN <b>' + esc(isin) + "</b></span><span>Ticker <b>" + esc(r.symbol) + "</b></span></p>" +
-      '<div class="notas"><p><b>Ficha pendiente.</b> Esta empresa todavía no está en tu base y el plan gratuito de Finnhub no da ratios de empresas fuera de EE. UU. Pulsa «Añadir a mi base» y la incorporaré con sus ratios, analistas y fuentes en la próxima actualización.</p></div>' +
-      '<div class="grafico-empresa tradingview-widget-container" id="tv-emp"></div>' + enlaceTV(tv) + botonesGitHub(isin, r.description) +
+      '<div class="notas"><p><b>Ficha pendiente.</b> Esta empresa todavía no está en tu base y el plan gratuito de Finnhub no da ratios de empresas fuera de EE. UU. Pulsa «Añadir a mi base»: en unos 2–3 minutos se crea automáticamente su ficha con gráfico y ratios de Yahoo Finance (luego la reviso y contrasto). Recarga la página pasado ese tiempo.</p></div>' +
+      '<div class="grafico-empresa g-tarjeta" id="tv-emp"></div>' + enlaceTV(tv) + botonesGitHub(isin, r.description) +
       '<div class="fuentes"><h2>Fuentes</h2><ul><li><a href="https://finnhub.io/" rel="noopener" target="_blank">Finnhub</a>: identificación por ISIN, consultado el ' + esc(ahoraES()) + '.</li><li><a href="https://www.tradingview.com/symbols/' + esc(tv.replace(":", "-")) + '/" rel="noopener" target="_blank">TradingView</a>: gráfico en vivo.</li></ul></div>';
-    widget($("#tv-emp"), "embed-widget-symbol-overview.js", simbolosCfg(r.description, tv));
+    $("#tv-emp").innerHTML = '<p class="g-sin">Gráfico disponible en cuanto la añadas a tu base (unos minutos).</p>';
   }
 
   function enlaceTV(tv) {
-    return '<p class="meta">Si el gráfico no aparece, TradingView no permite mostrar esta bolsa fuera de su web: <a href="https://www.tradingview.com/symbols/' + esc(String(tv).replace(":", "-")) + '/" target="_blank" rel="noopener">ábrelo en TradingView ↗</a></p>';
+    return '<p class="meta">Análisis técnico avanzado: <a href="https://www.tradingview.com/symbols/' + esc(String(tv).replace(":", "-")) + '/" target="_blank" rel="noopener">abrir en TradingView ↗</a></p>';
   }
   function simbolosCfg(nombre, tv) {
     return { symbols: [[nombre, tv + "|12M"]], chartOnly: false, width: "100%", height: "100%", autosize: true, showVolume: false, hideDateRanges: false, scalePosition: "right", scaleMode: "Normal", chartType: "area", dateRanges: ["1d|1", "1m|30", "3m|60", "12m|1D", "60m|1W", "all|1M"] };
@@ -242,13 +256,13 @@
       const p = e.precio, fp = e.fuentes[p.fuente] || {};
       h += '<div class="e-precio"><div class="peq">Precio</div><div class="grande">' + nf(p.v, 2) + " " + esc(e.divisa === "GBP" ? "£" : e.divisa || "") + "</div>";
       if (p.cambio_pct != null) h += '<div class="cambio ' + (p.cambio_pct >= 0 ? "pos" : "neg") + '">' + (p.cambio_pct >= 0 ? "+" : "") + nf(p.cambio_pct, 2) + " % hoy</div>";
-      h += '<div class="peq">' + (fp.vivo ? "Consultado el " + esc(new Date(p.fecha).toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short" })) : "Precio del " + esc(fechaES(p.fecha)) + (p.nota ? " (" + esc(p.nota) + ")" : "") + ". El gráfico de abajo va en vivo.") +
+      h += '<div class="peq">' + (fp.vivo ? "Consultado el " + esc(new Date(p.fecha).toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short" })) : "Precio del " + esc(fechaES(p.fecha)) + (p.nota ? " (" + esc(p.nota) + ")" : "") + ". El gráfico de abajo se actualiza cada 30 min.") +
         ' · <a href="' + esc(fp.url) + '" target="_blank" rel="noopener">Fuente ↗</a></div>';
       if (e.ratios.cap_bursatil) h += '<div class="peq">Capitalización: ' + nf(e.ratios.cap_bursatil / 1000, 2) + " mil millones " + esc(e.divisa || "") + (e.ratios.ev ? " · Valor de empresa (EV): " + nf(e.ratios.ev / 1000, 2) + " mil millones" : "") + "</div>";
       h += "</div>";
     }
     h += "</div>";
-    h += '<div class="grafico-empresa tradingview-widget-container" id="tv-emp"></div>' + enlaceTV(e.tv);
+    h += '<div class="grafico-empresa g-tarjeta" id="tv-emp"></div>' + enlaceTV(e.tv);
     if (e.notas && e.notas.length) h += '<div class="notas">' + e.notas.map((n) => "<p>" + esc(n) + "</p>").join("") + "</div>";
     h += '<div class="sector-caja"><h3>Cómo se valora este sector: ' + esc(sec.nombre) + "</h3><p>" + esc(sec.claves) + "</p>" +
       (sec.ref ? "<p>Referencia (mediana en EE. UU., Damodaran, enero 2026): " + (sec.ref.ev_ebitda ? "EV/EBITDA " + nf(sec.ref.ev_ebitda, 1) + "x" : "") + (sec.ref.per_fwd ? " · PER forward " + nf(sec.ref.per_fwd, 1) + "x" : "") + ' (' + esc(sec.ref.damodaran) + ') · <a href="' + esc(SECT.fuente_referencia.url_ev_ebitda) + '" target="_blank" rel="noopener">Fuente ↗</a></p>' : "") +
@@ -303,7 +317,9 @@
     if (e.origen === "finnhub") h = h.replace('<div class="acciones">', '<div class="acciones"><button type="button" class="btn sec" id="refrescar">Refrescar datos</button>');
 
     $("#empresa").innerHTML = h;
-    widget($("#tv-emp"), "embed-widget-symbol-overview.js", simbolosCfg(e.nombre, e.tv));
+    Grafico.grande($("#tv-emp"), { id: e.isin, etiqueta: esc(e.nombre) }).then((ok) => {
+      if (!ok) $("#tv-emp").innerHTML = '<p class="g-sin">' + (e.origen === "finnhub" ? "Pulsa «Guardar en mi base» y en unos minutos tendrás su gráfico aquí." : "El gráfico se genera en la próxima actualización de datos (cada 30 min).") + "</p>";
+    });
     const rb = $("#refrescar"); if (rb) rb.onclick = () => empresa(e.isin);
     document.querySelectorAll(".hist-svg").forEach((s) => dibujarHist(s, e.hist[s.dataset.serie], s.dataset.pct === "1"));
   }

@@ -1,9 +1,7 @@
 {
- "fecha": "2026-11-26T23:45:00+01:00",
+ "fecha": "2026-11-27T00:20:00+01:00",
  "tipo": "Actualización",
- "resumen": "Nueva ficha: TotalEnergies (pedida desde la web). Modo oscuro y gráfico del Euro Stoxx 50 corregido.",
+ "resumen": "Gráficos nuevos estilo Financial Hub (periodos, mercado/futuros, información al pasar el ratón), también en las fichas. «Añadir a mi base» ahora crea la ficha automáticamente en unos minutos.",
  "actualizadas": [],
- "nuevas": [
-  "TotalEnergies"
- ]
+ "nuevas": []
 }

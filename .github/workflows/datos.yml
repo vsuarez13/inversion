@@ -1,0 +1,54 @@
+name: Datos de la web
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"   # precios cada 30 minutos (GitHub puede retrasarlo unos minutos)
+  workflow_dispatch: {}        # botón "Run workflow" para actualizar a mano
+  issues:
+    types: [opened]            # peticiones "Añadir a mi base" desde la web
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: datos
+  cancel-in-progress: false
+
+jobs:
+  datos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet yfinance
+
+      - name: Añadir empresa pedida
+        if: github.event_name == 'issues'
+        env:
+          TITULO: ${{ github.event.issue.title }}
+        run: python scripts/anadir_empresa.py
+
+      - name: Actualizar precios
+        run: python scripts/actualizar_precios.py
+
+      - name: Guardar cambios
+        run: |
+          git config user.name "datos-bot"
+          git config user.email "datos-bot@users.noreply.github.com"
+          git add data
+          git diff --cached --quiet || git commit -m "Datos actualizados"
+          git pull --rebase --quiet || true
+          git push
+
+      - name: Responder a la petición
+        if: github.event_name == 'issues'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NUM: ${{ github.event.issue.number }}
+        run: |
+          if [ -f resultado.txt ]; then gh issue comment "$NUM" --body "$(cat resultado.txt)"; fi
+          if grep -q "Ficha automática creada" resultado.txt 2>/dev/null; then gh issue close "$NUM"; fi
