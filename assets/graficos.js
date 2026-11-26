@@ -17,7 +17,16 @@
     return cache[id];
   }
 
-  function recortar(d, rango) {
+  // Yahoo a veces tarda en publicar la vela diaria de hoy: se añade con el último precio
+  function diarioCompleto(d) {
+    if (d._dc) return d._dc;
+    const dia = d.diario.slice(), ult = dia[dia.length - 1], ti = (d.intradia && d.intradia.length ? d.intradia[d.intradia.length - 1][0] : 0);
+    const dias = ult ? Math.floor((ti - ult[0]) / 86400) : 0;
+    if (dias >= 1 && d.ultimo != null) dia.push([ult[0] + dias * 86400, d.ultimo]);
+    return (d._dc = dia);
+  }
+  function recortar(d0, rango) {
+    const d = Object.assign({}, d0, { diario: diarioCompleto(d0) });
     if (rango === "sesion") return { puntos: d.intradia && d.intradia.length ? d.intradia : d.diario.slice(-2), base: d.cierre_anterior, intradia: true };
     if (rango === "1s") return { puntos: d.semana && d.semana.length ? d.semana : d.diario.slice(-6), base: null, intradia: true };
     const fin = d.diario[d.diario.length - 1][0] * 1000;
