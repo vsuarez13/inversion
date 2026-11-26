@@ -1,1 +1,64 @@
-{"empresas": {}}
+{
+ "empresas": {
+  "US67066G1040": {
+   "nombre": "NVIDIA Corporation",
+   "ticker": "NVDA",
+   "yahoo": "NVDA",
+   "bolsa": "NasdaqGS",
+   "tv": "NVDA",
+   "pais": "United States",
+   "divisa": "USD",
+   "sector": "semiconductores",
+   "industria": "Semiconductors",
+   "descripcion": "",
+   "precio": {
+    "v": 149.3,
+    "fecha": "2026-11-26",
+    "fuente": "yf"
+   },
+   "ratios": {
+    "cap_bursatil": 3605147.1565,
+    "ev": 3539442.86,
+    "per_ttm": 16.0365,
+    "per_fwd": 8.9911,
+    "peg": 0.1519,
+    "ev_ebitda": 14.549,
+    "ev_ventas": 9.783,
+    "p_ventas": 9.9643,
+    "p_vc": 13.4967,
+    "deuda_ebitda": 0.16,
+    "deuda_patrimonio": 0.1431,
+    "liquidez": 4.084,
+    "margen_bruto": 74.921,
+    "margen_operativo": 66.082,
+    "margen_ebitda": 67.24,
+    "margen_neto": 62.535,
+    "margen_fcf": null,
+    "roe": 117.364,
+    "roic": null,
+    "rent_dividendo": 0.3347,
+    "payout": 3.54,
+    "beta": 2.247,
+    "var_52s": -15.6497
+   },
+   "analistas": {
+    "consenso": "Comprar",
+    "n": 59,
+    "objetivo": 242.4278,
+    "potencial": 62.38,
+    "fuente": "yf"
+   },
+   "notas": [
+    "Ficha automática con datos de Yahoo Finance, sin revisar todavía. En la próxima revisión la contrasto con otras fuentes y añado comentarios."
+   ],
+   "fuentes": {
+    "yf": {
+     "nombre": "Yahoo Finance · estadísticas (ficha automática)",
+     "url": "https://finance.yahoo.com/quote/NVDA/key-statistics",
+     "fecha": "2026-11-26"
+    }
+   },
+   "automatica": true
+  }
+ }
+}
