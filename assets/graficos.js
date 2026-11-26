@@ -83,7 +83,10 @@
     // cabecera
     const v = tarjeta.querySelector(".g-valor"), c = tarjeta.querySelector(".g-cambio"), f = tarjeta.querySelector(".g-fecha");
     const dif = ultimo - base, pct = (dif / base) * 100;
-    v.textContent = nf(ultimo);
+    v.textContent = nf(ultimo) + " €";
+    const o = tarjeta.querySelector(".g-orig");
+    if (o) o.textContent = datos.moneda_original && datos.moneda_original !== "EUR" && datos.ultimo_original != null
+      ? (ctx.esIndice ? "En puntos: " : "En su moneda: ") + nf(datos.ultimo_original) + " " + datos.moneda_original + " · convertido a euros" : "";
     c.textContent = sg(dif) + nf(Math.abs(dif)) + " · " + sg(pct) + nf(Math.abs(pct)) + " %";
     c.className = "g-cambio " + (sube ? "pos" : "neg");
     const tUlt = r.puntos[r.puntos.length - 1][0];
@@ -100,7 +103,7 @@
       const d = p.seriesData.get(ctx.serie); if (!d) { tip.hidden = true; return; }
       const pct = ((d.value - ctx.base) / ctx.base) * 100;
       const ref = ctx.rango === "sesion" ? "vs. cierre anterior" : "vs. inicio del periodo";
-      tip.innerHTML = "<b>" + nf(d.value) + '</b> <span class="' + (pct >= 0 ? "pos" : "neg") + '">' + sg(pct) + nf(Math.abs(pct)) + " %</span> " + ref +
+      tip.innerHTML = "<b>" + nf(d.value) + ' €</b> <span class="' + (pct >= 0 ? "pos" : "neg") + '">' + sg(pct) + nf(Math.abs(pct)) + " %</span> " + ref +
         "<br><span>" + fechaTxt(p.time - TZ, ctx.r.intradia) + "</span>" + (ctx.estado ? "<br><span>" + ctx.estado + "</span>" : "");
       tip.hidden = false;
       const w = ctx.tarjeta.clientWidth, x = Math.min(Math.max(p.point.x + 12, 8), w - tip.offsetWidth - 8);
@@ -114,8 +117,8 @@
     // Tarjeta pequeña (portada)
     tarjeta(el, cfg) {
       el.innerHTML = '<div class="g-cab"><span class="g-nom">' + cfg.etiqueta + '</span><span class="g-fecha"></span></div>' +
-        '<div class="g-fila"><span class="g-valor">—</span><span class="g-cambio"></span></div><div class="g-area"></div><div class="g-tip" hidden></div>';
-      const ctx = { tarjeta: el, rango: cfg.rango || "sesion", estado: estadoMercado(cfg.bolsa, cfg.futuro) };
+        '<div class="g-fila"><span class="g-valor">—</span><span class="g-cambio"></span></div><div class="g-orig"></div><div class="g-area"></div><div class="g-tip" hidden></div>';
+      const ctx = { tarjeta: el, rango: cfg.rango || "sesion", estado: estadoMercado(cfg.bolsa, cfg.futuro), esIndice: true };
       return cargar(cfg.id).then((d) => {
         ctx.datos = d;
         ctx.chart = nuevoGrafico(el.querySelector(".g-area"), false);
@@ -126,7 +129,7 @@
     // Gráfico grande con ejes y botones (ficha de empresa)
     grande(el, cfg) {
       el.innerHTML = '<div class="g-cab"><span class="g-nom">' + cfg.etiqueta + '</span><span class="g-fecha"></span></div>' +
-        '<div class="g-fila"><span class="g-valor">—</span><span class="g-cambio"></span></div>' +
+        '<div class="g-fila"><span class="g-valor">—</span><span class="g-cambio"></span></div><div class="g-orig"></div>' +
         '<div class="g-rangos" role="tablist">' + RANGOS.map(([k, t]) => '<button type="button" data-r="' + k + '"' + (k === "1a" ? ' class="on"' : "") + ">" + t + "</button>").join("") + "</div>" +
         '<div class="g-area grande"></div><div class="g-tip" hidden></div><p class="g-fuente"></p>';
       const ctx = { tarjeta: el, rango: "1a", estado: "" };
@@ -139,7 +142,8 @@
           ctx.rango = b.dataset.r; pintarSerie(ctx);
         });
         el.querySelector(".g-fuente").innerHTML = 'Precios: <a href="' + d.url + '" target="_blank" rel="noopener">Yahoo Finance ↗</a> · datos actualizados el ' +
-          new Date(d.actualizado).toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short" }) + " (cada 30 min, retraso de unos 15 min según la bolsa)";
+          new Date(d.actualizado).toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short" }) + " (cada 30 min, retraso de unos 15 min según la bolsa)" +
+          (d.tipo_cambio ? " · convertido a euros con el tipo " + d.tipo_cambio.par + " de Yahoo Finance en cada fecha" : "");
         return true;
       }).catch(() => false);
     },

@@ -61,6 +61,56 @@ def descargar(simbolo):
     }
 
 
+FX = {}  # caché de tipos de cambio: moneda -> (diario, intradia, semana) como listas [t, unidades por 1 EUR]
+
+
+def fx(moneda):
+    if moneda not in FX:
+        t = yf.Ticker("EUR" + moneda + "=X")
+        FX[moneda] = (serie(t.history(period="10y", interval="1d")), serie(t.history(period="5d", interval="5m")),
+                      serie(t.history(period="1mo", interval="30m")))
+    return FX[moneda]
+
+
+def a_euros(puntos, tasas, respaldo):
+    """Divide cada precio por el tipo EUR/moneda vigente en ese momento (el último conocido antes)."""
+    out, j, tasa = [], 0, None
+    for t, v in puntos:
+        while j < len(tasas) and tasas[j][0] <= t:
+            tasa = tasas[j][1]
+            j += 1
+        r = tasa or respaldo
+        out.append([t, round(v / r, 4)])
+    return out
+
+
+def convertir(d):
+    moneda, factor = d.get("divisa") or "EUR", 1.0
+    if moneda in ("GBp", "GBX"):
+        moneda, factor = "GBP", 0.01
+    if moneda == "ILA":
+        moneda, factor = "ILS", 0.01
+    d["moneda_original"] = d.get("divisa")
+    d["ultimo_original"], d["cierre_anterior_original"] = d["ultimo"], d["cierre_anterior"]
+    if moneda == "EUR":
+        d["divisa"] = "EUR"
+        return d
+    dia, intra, sem = fx(moneda)
+    ultima_tasa = (intra or dia)[-1][1]
+    for k in ("diario", "intradia", "semana"):
+        d[k] = [[t, v * factor] for t, v in d[k]]
+    d["diario"] = a_euros(d["diario"], dia, ultima_tasa)
+    d["semana"] = a_euros(d["semana"], sem or dia, ultima_tasa)
+    d["intradia"] = a_euros(d["intradia"], intra or dia, ultima_tasa)
+    d["ultimo"] = d["intradia"][-1][1] if d["intradia"] else d["diario"][-1][1]
+    if d["cierre_anterior"] is not None:
+        previa = [x for x in d["diario"] if x[0] < (d["intradia"][0][0] if d["intradia"] else d["diario"][-1][0])]
+        d["cierre_anterior"] = previa[-1][1] if previa else round(d["cierre_anterior"] * factor / ultima_tasa, 4)
+    d["tipo_cambio"] = {"par": "EUR/" + moneda, "valor": ultima_tasa}
+    d["divisa"] = "EUR"
+    return d
+
+
 def guardar(id_, datos):
     datos["id"] = id_
     datos["actualizado"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
@@ -81,12 +131,21 @@ def main():
     errores = []
     for id_, sim in trabajos:
         try:
-            guardar(id_, descargar(sim))
+            guardar(id_, convertir(descargar(sim)))
             print("ok", id_, sim)
         except Exception as ex:  # un fallo no detiene el resto
             errores.append(f"{id_} ({sim}): {ex}")
             print("ERROR", id_, sim, ex, file=sys.stderr)
         time.sleep(0.5)
+    tasas = {}
+    for m in ("USD", "GBP", "JPY", "HKD", "CHF", "SEK", "DKK", "NOK", "CAD", "AUD"):
+        try:
+            tasas[m] = fx(m)[1][-1][1] if fx(m)[1] else fx(m)[0][-1][1]
+        except Exception as ex:
+            print("FX error", m, ex, file=sys.stderr)
+    with open(os.path.join(SALIDA, "_fx.json"), "w", encoding="utf-8") as f:
+        json.dump({"actualizado": datetime.now(timezone.utc).isoformat(timespec="seconds"), "eur_a": tasas,
+                   "nota": "Unidades de cada moneda por 1 euro (Yahoo Finance)"}, f, ensure_ascii=False, indent=1)
     estado = {"actualizado": datetime.now(timezone.utc).isoformat(timespec="seconds"), "series": len(trabajos) - len(errores), "errores": errores}
     with open(os.path.join(SALIDA, "_estado.json"), "w", encoding="utf-8") as f:
         json.dump(estado, f, ensure_ascii=False, indent=1)

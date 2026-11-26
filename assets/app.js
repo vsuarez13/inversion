@@ -19,6 +19,17 @@
     fetch("data/universo.json").then((r) => r.json())
   ]).then(([e, r, s, a, u]) => { DB = e; RATIOS = r; SECT = s; UNI = u; Object.keys(a.empresas || {}).forEach((k) => { if (!DB.empresas[k]) DB.empresas[k] = a.empresas[k]; }); });
 
+  /* ---------- Conversión a euros ---------- */
+  let FXR = { EUR: 1 };
+  const cargarFX = fetch("data/precios/_fx.json", { cache: "no-store" }).then((r) => r.json()).then((f) => { FXR = Object.assign({ EUR: 1 }, f.eur_a || {}); }).catch(() => {});
+  function aEUR(v, divisa) {
+    if (v == null || isNaN(v)) return null;
+    let m = divisa || "EUR", k = 1;
+    if (m === "GBp" || m === "GBX") { m = "GBP"; k = 0.01; }
+    const t = FXR[m];
+    return t ? (v * k) / t : null;
+  }
+
   /* ---------- Validación de ISIN (dígito de control) ---------- */
   function isinValido(isin) {
     if (!/^[A-Z]{2}[A-Z0-9]{9}[0-9]$/.test(isin)) return false;
@@ -164,7 +175,7 @@
   async function empresa(isin) {
     const cont = $("#empresa");
     cont.innerHTML = '<p class="cargando">Cargando ' + esc(isin) + "…</p>";
-    await cargarDatos;
+    await cargarDatos; await cargarFX;
     if (!isinValido(isin)) { cont.innerHTML = '<a class="volver" href="#/">← Volver</a><h1 class="tit">ISIN no válido</h1><p class="intro">Revisa el código: ' + esc(isin) + "</p>"; return; }
     const base = DB.empresas[isin];
     if (base) {
@@ -187,6 +198,13 @@
     }
   }
 
+  function urlPeticion(isin, nombre) {
+    return "https://github.com/" + (C.repo || "") + "/issues/new?title=" + encodeURIComponent("Añadir a mi base: " + nombre + " (" + isin + ")") +
+      "&body=" + encodeURIComponent("Por favor, añade a la base la empresa " + nombre + " con ISIN " + isin + ".");
+  }
+  function botonGuardar(isin, nombre) {
+    return '<a class="btn" href="' + urlPeticion(isin, nombre) + '" target="_blank" rel="noopener">Guardar en mi base</a>';
+  }
   function botonesGitHub(isin, nombre, modo) {
     const repo = C.repo || "";
     const t = modo === "actualizar" ? "Actualizar: " + nombre + " (" + isin + ")" : "Añadir a mi base: " + nombre + " (" + isin + ")";
@@ -202,7 +220,7 @@
       '<div class="notas"><p><b>Ficha pendiente.</b> Esta empresa todavía no está en tu base y el plan gratuito de Finnhub no da ratios de empresas fuera de EE. UU. Pulsa «Añadir a mi base»: en unos 2–3 minutos se crea automáticamente su ficha con gráfico y ratios de Yahoo Finance (luego la reviso y contrasto). Recarga la página pasado ese tiempo.</p></div>' +
       '<div class="grafico-empresa g-tarjeta" id="tv-emp"></div>' + enlaceTV(tv) + botonesGitHub(isin, r.description) +
       '<div class="fuentes"><h2>Fuentes</h2><ul><li><a href="https://finnhub.io/" rel="noopener" target="_blank">Finnhub</a>: identificación por ISIN, consultado el ' + esc(ahoraES()) + '.</li><li><a href="https://www.tradingview.com/symbols/' + esc(tv.replace(":", "-")) + '/" rel="noopener" target="_blank">TradingView</a>: gráfico en vivo.</li></ul></div>';
-    $("#tv-emp").innerHTML = '<p class="g-sin">Gráfico disponible en cuanto la añadas a tu base (unos minutos).</p>';
+    $("#tv-emp").innerHTML = '<div class="g-sin"><p>Gráfico disponible en cuanto la añadas a tu base (unos 3 minutos).</p>' + botonGuardar(isin, r.description) + "</div>";
   }
 
   function enlaceTV(tv) {
@@ -254,11 +272,15 @@
     h += "</div>";
     if (e.precio) {
       const p = e.precio, fp = e.fuentes[p.fuente] || {};
-      h += '<div class="e-precio"><div class="peq">Precio</div><div class="grande">' + nf(p.v, 2) + " " + esc(e.divisa === "GBP" ? "£" : e.divisa || "") + "</div>";
+      const pe = aEUR(p.v, e.divisa), esEUR = (e.divisa || "EUR") === "EUR";
+      h += '<div class="e-precio"><div class="peq">Precio en euros</div><div class="grande">' + (pe != null ? nf(pe, 2) + " €" : nf(p.v, 2) + " " + esc(e.divisa)) + "</div>";
+      if (!esEUR && pe != null) h += '<div class="peq">' + nf(p.v, 2) + " " + esc(e.divisa) + " en su bolsa · cambio EUR/" + esc(e.divisa === "GBp" ? "GBP" : e.divisa) + " " + nf(FXR[e.divisa === "GBp" ? "GBP" : e.divisa], 4) + " (Yahoo Finance)</div>";
       if (p.cambio_pct != null) h += '<div class="cambio ' + (p.cambio_pct >= 0 ? "pos" : "neg") + '">' + (p.cambio_pct >= 0 ? "+" : "") + nf(p.cambio_pct, 2) + " % hoy</div>";
       h += '<div class="peq">' + (fp.vivo ? "Consultado el " + esc(new Date(p.fecha).toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short" })) : "Precio del " + esc(fechaES(p.fecha)) + (p.nota ? " (" + esc(p.nota) + ")" : "") + ". El gráfico de abajo se actualiza cada 30 min.") +
         ' · <a href="' + esc(fp.url) + '" target="_blank" rel="noopener">Fuente ↗</a></div>';
-      if (e.ratios.cap_bursatil) h += '<div class="peq">Capitalización: ' + nf(e.ratios.cap_bursatil / 1000, 2) + " mil millones " + esc(e.divisa || "") + (e.ratios.ev ? " · Valor de empresa (EV): " + nf(e.ratios.ev / 1000, 2) + " mil millones" : "") + "</div>";
+      const mc = e.ratios.cap_bursatil != null ? aEUR(e.ratios.cap_bursatil, e.divisa === "GBp" ? "GBP" : e.divisa) : null, ev = e.ratios.ev != null ? aEUR(e.ratios.ev, e.divisa === "GBp" ? "GBP" : e.divisa) : null;
+      if (mc) h += '<div class="peq">Capitalización: ' + nf(mc / 1000, 2) + " mil millones €" + (ev ? " · Valor de empresa (EV): " + nf(ev / 1000, 2) + " mil millones €" : "") + "</div>";
+      if (e.origen === "finnhub") h += '<div style="margin-top:12px">' + botonGuardar(e.isin, e.nombre) + "</div>";
       h += "</div>";
     }
     h += "</div>";
@@ -296,7 +318,7 @@
       h += '<p class="meta">Recomendaciones del mes ' + esc(a.periodo) + ' · <a href="' + esc(fa.url) + '" target="_blank" rel="noopener">Fuente ↗</a>. El precio objetivo es de pago en Finnhub.</p>';
     } else if (a) {
       const fa = e.fuentes[a.fuente] || {};
-      h += '<div class="analistas"><div class="kpi"><div class="k">Consenso</div><div class="v">' + esc(a.consenso) + '</div></div><div class="kpi"><div class="k">Analistas</div><div class="v">' + esc(a.n) + '</div></div><div class="kpi"><div class="k">Precio objetivo medio</div><div class="v">' + nf(a.objetivo, 2) + '</div></div><div class="kpi"><div class="k">Potencial</div><div class="v cambio ' + (a.potencial >= 0 ? "pos" : "neg") + '">' + (a.potencial >= 0 ? "+" : "") + nf(a.potencial, 1) + " %</div></div></div>";
+      h += '<div class="analistas"><div class="kpi"><div class="k">Consenso</div><div class="v">' + esc(a.consenso) + '</div></div><div class="kpi"><div class="k">Analistas</div><div class="v">' + esc(a.n) + '</div></div><div class="kpi"><div class="k">Precio objetivo medio</div><div class="v">' + (aEUR(a.objetivo, e.divisa) != null ? nf(aEUR(a.objetivo, e.divisa), 2) + " €" : nf(a.objetivo, 2)) + '</div></div><div class="kpi"><div class="k">Potencial</div><div class="v cambio ' + (a.potencial >= 0 ? "pos" : "neg") + '">' + (a.potencial >= 0 ? "+" : "") + nf(a.potencial, 1) + " %</div></div></div>";
       h += '<p class="meta">Dato del ' + esc(fechaES(fa.fecha)) + ' · <a href="' + esc(fa.url) + '" target="_blank" rel="noopener">Fuente ↗</a>. Los analistas recomiendan comprar con mucha más frecuencia que vender: úsalo como una opinión más.</p>';
     } else h += '<p class="meta">Sin datos de analistas.</p>';
     h += "</section>";
@@ -318,7 +340,9 @@
 
     $("#empresa").innerHTML = h;
     Grafico.grande($("#tv-emp"), { id: e.isin, etiqueta: esc(e.nombre) }).then((ok) => {
-      if (!ok) $("#tv-emp").innerHTML = '<p class="g-sin">' + (e.origen === "finnhub" ? "Pulsa «Guardar en mi base» y en unos minutos tendrás su gráfico aquí." : "El gráfico se genera en la próxima actualización de datos (cada 30 min).") + "</p>";
+      if (!ok) $("#tv-emp").innerHTML = e.origen === "finnhub"
+        ? '<div class="g-sin"><p>Esta empresa aún no está en tu base, así que no tiene gráfico. Guárdala y en unos 3 minutos tendrás aquí su gráfico en euros (recarga la página).</p>' + botonGuardar(e.isin, e.nombre) + '<p class="meta">Se abrirá GitHub con la petición ya escrita: solo tienes que pulsar «Create» (o «Submit new issue»).</p></div>'
+        : '<p class="g-sin">El gráfico se genera en la próxima actualización de datos (cada 30 min).</p>';
     });
     const rb = $("#refrescar"); if (rb) rb.onclick = () => empresa(e.isin);
     document.querySelectorAll(".hist-svg").forEach((s) => dibujarHist(s, e.hist[s.dataset.serie], s.dataset.pct === "1"));
