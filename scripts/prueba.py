@@ -1,33 +1,21 @@
-import json, traceback, urllib.request
-import yfinance as yf
+import json, re, urllib.request
 out = []
 def log(*a): out.append(" ".join(str(x) for x in a))
-for isin in ["FR0010655746", "IE00B5BMR087", "IE000N4ZYX28", "IE00BYX5N771", "IE00B4L5Y983"]:
-    try:
-        q = yf.Search(isin, max_results=8).quotes or []
-        log("SEARCH", isin, [(x.get("symbol"), x.get("quoteType"), x.get("exchange")) for x in q])
-        for x in q[:3]:
-            s = x["symbol"]
-            try:
-                fd = yf.Ticker(s).funds_data
-                th = fd.top_holdings
-                log("  ", s, "holdings:", th.head(12).to_dict() if th is not None else None)
-                log("  ", s, "sectores:", fd.sector_weightings)
-                log("  ", s, "clases:", fd.asset_classes)
-            except Exception as e:
-                log("  ", s, "ERR", repr(e)[:200])
-    except Exception as e:
-        log("ERR", isin, repr(e)[:200])
-H = {"User-Agent": "Mozilla/5.0", "Accept": "application/json, text/plain, */*", "Referer": "https://www.ls-tc.de/"}
-for url in ["https://www.ls-tc.de/_rpc/json/.lstc/instrument/search/main?q=FR0010655746&localeId=2",
-            "https://www.ls-tc.de/_rpc/json/.lstc/instrument/search/main?q=US67066G1040&localeId=2",
-            "https://www.ls-tc.de/de/etf/FR0010655746", "https://www.ls-tc.de/de/aktie/US67066G1040"]:
-    try:
-        r = urllib.request.urlopen(urllib.request.Request(url, headers=H), timeout=20)
-        b = r.read().decode("utf-8", "replace")
-        log("LS", url, r.status, b[:1500].replace("\n", " "))
-        import re
-        log("   ids", sorted(set(re.findall(r'instrumentId[\"=:\s]+(\d+)', b)))[:10], sorted(set(re.findall(r'push\.ls-tc\.de[^"\']*|_rpc/json/[^"\'\s]+', b)))[:15])
-    except Exception as e:
-        log("LS ERR", url, repr(e)[:300])
+H = {"User-Agent": "Mozilla/5.0", "Accept": "application/json, text/plain, */*", "Referer": "https://www.ls-tc.de/de/etf/76298", "X-Requested-With": "XMLHttpRequest"}
+def get(u):
+    r = urllib.request.urlopen(urllib.request.Request(u, headers=H), timeout=20); return r.read().decode("utf-8", "replace")
+try:
+    b = get("https://www.ls-tc.de/de/etf/76298")
+    for m in re.finditer(r"dataForInstrument|statistik|pushtable|push\.ls-tc", b):
+        log("CTX", b[max(0, m.start()-600): m.end()+600].replace("\n", " "))
+    for m in re.finditer(r'<script[^>]+src="([^"]+)"', b): log("JS", m.group(1))
+    log("NUMS", re.findall(r'(?:item|field|data-push)[^>]{0,120}', b)[:40])
+except Exception as e: log("ERR page", repr(e))
+base = "https://www.ls-tc.de/_rpc/json/instrument/chart/dataForInstrument?instrumentId=76298"
+for q in ["", "&marketId=1&quotetype=mid&series=intraday&localeId=2", "&series=history", "&series=intraday", "&period=1y", "&marketId=1&quotetype=mid&series=history&localeId=2"]:
+    try: log("CHART", q, get(base + q)[:600])
+    except Exception as e: log("CHART ERR", q, repr(e)[:200])
+for u in ["https://www.ls-tc.de/_rpc/json/instrument/base/statistik?instrumentId=76298", "https://www.ls-tc.de/_rpc/json/instrument/pushtable/result?instrumentId=76298"]:
+    try: log("OTRO", u, get(u)[:800])
+    except Exception as e: log("OTRO ERR", u, repr(e)[:200])
 open("data/_prueba.txt", "w").write("\n".join(out))
