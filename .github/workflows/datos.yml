@@ -26,6 +26,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main            # siempre la última versión (si había otra ejecución en cola)
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -47,7 +49,7 @@ jobs:
           git config user.email "datos-bot@users.noreply.github.com"
           git add data
           git diff --cached --quiet || git commit -m "Datos actualizados"
-          git pull --rebase --quiet || true
+          git pull --rebase -X theirs --quiet   # si chocan dos ejecuciones, ganan los datos más nuevos
           git push
 
       - name: Responder a la petición
