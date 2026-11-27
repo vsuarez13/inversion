@@ -74,7 +74,7 @@
    "indice": "ibex35",
    "precio": {
     "v": 495.6,
-    "fecha": "2026-11-26",
+    "fecha": "2026-11-27",
     "fuente": "yf"
    },
    "etf": {
@@ -93,10 +93,82 @@
     "yf": {
      "nombre": "Yahoo Finance · ficha del ETF (automática)",
      "url": "https://finance.yahoo.com/quote/CS1.PA",
-     "fecha": "2026-11-26"
+     "fecha": "2026-11-27"
     }
    },
-   "automatica": true
+   "automatica": true,
+   "composicion": {
+    "top": [
+     {
+      "simbolo": "SAN.MC",
+      "nombre": "Banco Santander SA",
+      "peso": 15.98
+     },
+     {
+      "simbolo": "IBE.MC",
+      "nombre": "Iberdrola SA",
+      "peso": 15.4
+     },
+     {
+      "simbolo": "BBVA.MC",
+      "nombre": "Banco Bilbao Vizcaya Argentaria SA",
+      "peso": 12.75
+     },
+     {
+      "simbolo": "ITX.MC",
+      "nombre": "Industria De Diseno Textil SA Share From Split",
+      "peso": 10.99
+     },
+     {
+      "simbolo": "CABK.MC",
+      "nombre": "CaixaBank SA",
+      "peso": 6.51
+     },
+     {
+      "simbolo": "FER",
+      "nombre": "Ferrovial NV",
+      "peso": 3.87
+     },
+     {
+      "simbolo": "AENA.MC",
+      "nombre": "Aena SME SA",
+      "peso": 3.41
+     },
+     {
+      "simbolo": "REP.MC",
+      "nombre": "Repsol SA",
+      "peso": 3.35
+     },
+     {
+      "simbolo": "ACS.MC",
+      "nombre": "ACS Actividades de Construccion y Servicios SA",
+      "peso": 2.67
+     },
+     {
+      "simbolo": "AMS.MC",
+      "nombre": "Amadeus IT Group SA",
+      "peso": 2.58
+     }
+    ],
+    "sectores": {
+     "Financiero": 39.77,
+     "Utilities": 20.74,
+     "Industria": 14.01,
+     "Consumo cíclico": 11.3,
+     "Tecnología": 3.79,
+     "Energía": 3.35,
+     "Inmobiliario": 2.73,
+     "Comunicaciones": 1.97,
+     "Materiales": 1.33,
+     "Salud": 0.67,
+     "Consumo básico": 0.35
+    },
+    "fecha": "2026-11-27",
+    "fuente": {
+     "nombre": "Yahoo Finance · composición (top 10)",
+     "url": "https://finance.yahoo.com/quote/CS1.PA/holdings"
+    }
+   }
   }
  }
 }
