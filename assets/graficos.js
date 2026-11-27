@@ -50,12 +50,13 @@
   }
 
   /* Estado del mercado (aprox., hora de Madrid) */
-  const HORARIO = { us: [[15, 30], [22, 0]], eu: [[9, 0], [17, 30]], jp: [[1, 0], [7, 30]], hk: [[2, 30], [9, 0]] };
+  const HORARIO = { ls: [[7, 30], [23, 0]], us: [[15, 30], [22, 0]], eu: [[9, 0], [17, 30]], jp: [[1, 0], [7, 30]], hk: [[2, 30], [9, 0]] };
   const FESTIVOS = {
     us: { "2026-11-26": "Acción de Gracias", "2026-12-25": "Navidad", "2027-01-01": "Año Nuevo", "2027-01-18": "Martin Luther King", "2027-02-15": "Día de los Presidentes",
       "2027-03-26": "Viernes Santo", "2027-05-31": "Memorial Day", "2027-06-18": "Juneteenth", "2027-07-05": "Independencia", "2027-09-06": "Día del Trabajo", "2027-11-25": "Acción de Gracias", "2027-12-24": "Navidad" },
     eu: { "2026-12-24": "Nochebuena", "2026-12-25": "Navidad", "2026-12-31": "Nochevieja", "2027-01-01": "Año Nuevo", "2027-03-26": "Viernes Santo", "2027-03-29": "Lunes de Pascua", "2027-12-24": "Nochebuena", "2027-12-31": "Nochevieja" }
   };
+  FESTIVOS.ls = { "2026-12-24": "Nochebuena", "2026-12-25": "Navidad", "2026-12-31": "Nochevieja", "2027-01-01": "Año Nuevo", "2027-03-26": "Viernes Santo", "2027-12-24": "Nochebuena", "2027-12-31": "Nochevieja" };
   const MEDIA_SESION = { us: { "2026-11-27": "19:00", "2026-12-24": "19:00", "2027-11-26": "19:00" } };
   function hoyMadrid() { const a = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Madrid" })); return a; }
   function iso(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
@@ -165,7 +166,8 @@
     // Tarjeta pequeña (portada)
     tarjeta(el, cfg) {
       el.innerHTML = '<div class="g-cab"><span class="g-nom">' + cfg.etiqueta + '</span><span class="g-fecha"></span></div>' +
-        '<div class="g-fila"><span class="g-valor">—</span><span class="g-cambio"></span></div><div class="g-orig"></div><div class="g-aviso" hidden></div><div class="g-area"></div><div class="g-tip" hidden></div>';
+        '<div class="g-fila"><span class="g-valor">—</span><span class="g-cambio"></span></div><div class="g-orig"></div><div class="g-aviso" hidden></div><div class="g-area"></div><div class="g-tip" hidden></div>' +
+        (cfg.oficial ? '<a class="g-oficial" href="' + cfg.oficial.url + '" target="_blank" rel="noopener">Fuente oficial: ' + cfg.oficial.nombre + " ↗</a>" : "");
       const ctx = { tarjeta: el, rango: cfg.rango || "sesion", estado: estadoMercado(cfg.bolsa, cfg.futuro), esIndice: true, bolsa: cfg.bolsa, futuro: cfg.futuro };
       return cargar(cfg.id).then((d) => {
         ctx.datos = d;
@@ -191,8 +193,9 @@
           el.querySelectorAll(".g-rangos button").forEach((x) => x.classList.toggle("on", x === b));
           ctx.rango = b.dataset.r; pintarSerie(ctx);
         });
-        el.querySelector(".g-fuente").innerHTML = 'Precios: <a href="' + d.url + '" target="_blank" rel="noopener">Yahoo Finance ↗</a> · datos actualizados el ' +
-          new Date(d.actualizado).toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short" }) + " (cada 30 min, retraso de unos 15 min según la bolsa)" +
+        const esLS = d.fuente === "LS Exchange";
+        el.querySelector(".g-fuente").innerHTML = 'Precios: <a href="' + d.url + '" target="_blank" rel="noopener">' + (esLS ? "LS Exchange (ls-tc.de)" : "Yahoo Finance") + ' ↗</a> · datos actualizados el ' +
+          new Date(d.actualizado).toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short" }) + (esLS ? " (cada 30 min; horario de LS: 7:30–23:00, como Trade Republic)" : " (cada 30 min, retraso de unos 15 min según la bolsa)") +
           (d.tipo_cambio ? " · convertido a euros con el tipo " + d.tipo_cambio.par + " de Yahoo Finance en cada fecha" : "");
         return true;
       }).catch(() => false);

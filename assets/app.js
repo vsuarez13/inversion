@@ -94,7 +94,7 @@
     tarjetas = UNI.indices.map((i, n) => {
       const fut = modoAct === "futuro" && i.futuro;
       const etiqueta = '<span class="pais">' + esc(i.pais) + "</span> " + esc(i.nombre) + (fut ? ' <span class="fut">futuro</span>' : "");
-      return Grafico.tarjeta($("#g-" + n), { id: fut ? i.id + "_fut" : i.id, etiqueta, rango: rangoAct, bolsa: i.bolsa, futuro: !!fut });
+      return Grafico.tarjeta($("#g-" + n), { id: fut ? i.id + "_fut" : i.id, etiqueta, rango: rangoAct, bolsa: i.bolsa, futuro: !!fut, oficial: fut ? (i.oficial_fut || i.oficial) : i.oficial });
     });
   }
   function recientes() {
@@ -288,20 +288,23 @@
       const mc = e.ratios.cap_bursatil != null ? aEUR(e.ratios.cap_bursatil, e.divisa === "GBp" ? "GBP" : e.divisa) : null, ev = e.ratios.ev != null ? aEUR(e.ratios.ev, e.divisa === "GBp" ? "GBP" : e.divisa) : null;
       if (mc) h += '<div class="peq">Capitalización: ' + nf(mc / 1000, 2) + " mil millones €" + (ev ? " · Valor de empresa (EV): " + nf(ev / 1000, 2) + " mil millones €" : "") + "</div>";
       if (e.origen === "finnhub") h += '<div style="margin-top:12px">' + botonGuardar(e.isin, e.nombre) + "</div>";
-      h += "</div>";
+      h += '<div class="peq ls-precio" id="precio-ls" hidden></div></div>';
     }
     h += "</div>";
+    h += '<div class="fuente-sel" id="fuente-sel" hidden><span>Precio de:</span><div class="g-rangos"><button data-f="origen">Su bolsa (Yahoo)</button><button data-f="ls">LS Exchange · como Trade Republic</button></div></div>';
     h += '<div class="grafico-empresa g-tarjeta" id="tv-emp"></div>' + enlaceTV(e.tv);
     if (e.notas && e.notas.length) h += '<div class="notas">' + e.notas.map((n) => "<p>" + esc(n) + "</p>").join("") + "</div>";
-    if (e.tipo === "etf") {
+    if (e.tipo === "etf" || e.tipo === "fondo") {
       const x = e.etf || {}, idx = e.indice && UNI ? UNI.indices.find((i) => i.id === e.indice) : null;
-      h += '<section class="grupo"><h2>Datos del ETF</h2><div class="analistas">' +
+      const esETF = e.tipo === "etf";
+      h += '<section class="grupo"><h2>Datos del ' + (esETF ? "ETF" : "fondo") + '</h2><div class="analistas">' +
         '<div class="kpi"><div class="k">Comisión anual (TER)</div><div class="v">' + (x.ter != null ? nf(x.ter, 2) + " %" : "—") + "</div></div>" +
         '<div class="kpi"><div class="k">Patrimonio</div><div class="v">' + (x.patrimonio != null ? nf(aEUR(x.patrimonio, e.divisa) / 1000, 2) + " mil M€" : "—") + "</div></div>" +
         '<div class="kpi"><div class="k">Gestora</div><div class="v" style="font-size:18px">' + esc(x.gestora || "—") + "</div></div>" +
         '<div class="kpi"><div class="k">Índice que replica</div><div class="v" style="font-size:18px">' + esc(idx ? idx.nombre : (x.categoria || "—")) + "</div></div></div>" +
         '<p class="meta">Fuente: <a href="' + esc((e.fuentes.yf || {}).url) + '" target="_blank" rel="noopener">Yahoo Finance ↗</a></p></section>';
-      h += '<div class="explica"><h3>¿Por qué tu bróker muestra otra variación que el índice?</h3>' +
+      h += composicionHTML(e);
+      if (esETF) h += '<div class="explica"><h3>¿Por qué tu bróker muestra otra variación que el índice?</h3>' +
         "<p>El índice se mide desde el cierre oficial de su bolsa (en España, a las 17:30). Trade Republic mide el ETF desde su último precio en LS Exchange, que cotiza hasta las 23:00 y sigue moviéndose con los futuros cuando la bolsa ya ha cerrado. Si el mercado sube o baja por la tarde-noche, el ETF se lo apunta ese mismo día y el índice al día siguiente.</p>" +
         "<p>En pocos días se compensan: compara periodos de 1 mes o más y verás que el ETF y su índice (línea gris) casi coinciden. La pequeña diferencia restante es la comisión, los dividendos (en los ETF de acumulación) y el tipo de cambio.</p></div>";
       h += '<div class="fuentes"><h2>Fuentes de esta ficha</h2><ul>' + Object.values(e.fuentes).map((f) => '<li><a href="' + esc(f.url) + '" target="_blank" rel="noopener">' + esc(f.nombre) + "</a>" + (f.fecha ? " · " + esc(fechaFuente(f)) : "") + "</li>").join("") + "</ul></div>";
@@ -364,14 +367,44 @@
     $("#empresa").innerHTML = h;
     trasPintar(e);
   }
+  function composicionHTML(e) {
+    const c = e.composicion;
+    const barra = (nom, peso, max, sub) => '<li><div class="c-fila"><span class="c-nom">' + esc(nom) + (sub ? ' <span class="c-sub">' + esc(sub) + "</span>" : "") +
+      '</span><span class="c-peso">' + nf(peso, 2) + ' %</span></div><div class="c-barra"><i style="width:' + Math.max(2, (peso / max) * 100).toFixed(1) + '%"></i></div></li>';
+    const ext = '<a href="https://www.justetf.com/es/etf-profile.html?isin=' + esc(e.isin) + '" target="_blank" rel="noopener">justETF ↗</a>';
+    if (!c) return '<section class="grupo"><h2>Composición</h2><p class="meta">Yahoo Finance no publica todavía la composición de este ' + (e.tipo === "etf" ? "ETF" : "fondo") +
+      ". Se vuelve a intentar cada semana. Mientras tanto puedes verla en la web de la gestora o en " + ext + ".</p></section>";
+    let h = '<section class="grupo"><h2>Composición</h2><div class="comp-grid">';
+    if (c.top && c.top.length) {
+      const suma = c.top.reduce((a, x) => a + x.peso, 0), max = Math.max(...c.top.map((x) => x.peso));
+      h += '<div class="comp-caja"><h3>Las ' + c.top.length + " mayores posiciones</h3><ol class=\"comp-lista\">" + c.top.map((x) => barra(x.nombre || x.simbolo, x.peso, max, x.simbolo)).join("") +
+        '</ol><p class="meta">Suman el ' + nf(suma, 1) + " % del total. El resto se reparte entre las demás empresas del índice.</p></div>";
+    } else h += '<div class="comp-caja"><h3>Mayores posiciones</h3><p class="meta">Yahoo no da las posiciones de este producto, solo el reparto por sectores. Lista completa en la web de la gestora o en ' + ext + ".</p></div>";
+    const sec = Object.entries(c.sectores || {});
+    if (sec.length) { const max = sec[0][1]; h += '<div class="comp-caja"><h3>Por sectores</h3><ol class="comp-lista">' + sec.map(([k, v]) => barra(k, v, max)).join("") + "</ol></div>"; }
+    h += '</div><p class="meta">Datos del ' + esc(fechaES(c.fecha)) + ' (se refrescan cada semana) · <a href="' + esc(c.fuente.url) + '" target="_blank" rel="noopener">Fuente: Yahoo Finance ↗</a> · Composición completa: ' + ext + "</p></section>";
+    return h;
+  }
+
   function trasPintar(e) {
     const bolsaDe = (c) => ({ US: "us", JP: "jp", HK: "hk" })[c] || "eu";
     const idx = e.indice && UNI ? UNI.indices.find((i) => i.id === e.indice) : null;
-    Grafico.grande($("#tv-emp"), { id: e.isin, etiqueta: esc(e.nombre), bolsa: bolsaDe((e.isin || "").slice(0, 2)), comparar: idx ? { id: idx.id, nombre: esc(idx.nombre) } : null }).then((ok) => {
+    const dibujar = (f) => Grafico.grande($("#tv-emp"), { id: f === "ls" ? e.isin + "_ls" : e.isin, etiqueta: esc(e.nombre) + (f === "ls" ? ' <span class="fut">LS Exchange</span>' : ""),
+      bolsa: f === "ls" ? "ls" : bolsaDe((e.isin || "").slice(0, 2)), comparar: idx ? { id: idx.id, nombre: esc(idx.nombre) } : null });
+    Grafico.cargar(e.isin + "_ls").then((d) => {
+      const pct = d.cierre_anterior ? (d.ultimo / d.cierre_anterior - 1) * 100 : null, pl = $("#precio-ls");
+      if (pl) { pl.hidden = false; pl.innerHTML = 'En <a href="' + esc(d.url) + '" target="_blank" rel="noopener">LS Exchange ↗</a> (la de Trade Republic): <b>' + nf(d.ultimo, 2) + " €</b>" +
+        (pct != null ? ' <span class="' + (pct >= 0 ? "pos" : "neg") + '">' + (pct >= 0 ? "+" : "") + nf(pct, 2) + " %</span> desde su cierre de las 23:00" : ""); }
+      const sel = $("#fuente-sel"); if (!sel) return;
+      sel.hidden = false;
+      const marcarF = (f) => sel.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.f === f));
+      const f0 = store.get("fuentePrecio", "ls"); marcarF(f0); dibujar(f0);
+      sel.onclick = (ev) => { const b = ev.target.closest("button"); if (!b) return; store.set("fuentePrecio", b.dataset.f); marcarF(b.dataset.f); dibujar(b.dataset.f); };
+    }).catch(() => dibujar("origen").then((ok) => {
       if (!ok) $("#tv-emp").innerHTML = e.origen === "finnhub"
         ? '<div class="g-sin"><p>Esta empresa aún no está en tu base, así que no tiene gráfico. Guárdala y en unos 3 minutos tendrás aquí su gráfico en euros (recarga la página).</p>' + botonGuardar(e.isin, e.nombre) + '<p class="meta">Se abrirá GitHub con la petición ya escrita: solo tienes que pulsar «Create» (o «Submit new issue»).</p></div>'
         : '<p class="g-sin">El gráfico se genera en la próxima actualización de datos (cada 30 min).</p>';
-    });
+    }));
     const rb = $("#refrescar"); if (rb) rb.onclick = () => empresa(e.isin);
     document.querySelectorAll(".hist-svg").forEach((s) => dibujarHist(s, e.hist[s.dataset.serie], s.dataset.pct === "1"));
   }

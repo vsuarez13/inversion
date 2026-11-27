@@ -6,7 +6,15 @@
    "pais": "US",
    "mercado": "^GSPC",
    "futuro": "ES=F",
-   "bolsa": "us"
+   "bolsa": "us",
+   "oficial": {
+    "nombre": "S&P Dow Jones Indices",
+    "url": "https://www.spglobal.com/spdji/en/indices/equity/sp-500/"
+   },
+   "oficial_fut": {
+    "nombre": "CME Group",
+    "url": "https://www.cmegroup.com/markets/equities/sp/e-mini-sandp500.html"
+   }
   },
   {
    "id": "nasdaq100",
@@ -14,7 +22,15 @@
    "pais": "US",
    "mercado": "^NDX",
    "futuro": "NQ=F",
-   "bolsa": "us"
+   "bolsa": "us",
+   "oficial": {
+    "nombre": "Nasdaq",
+    "url": "https://indexes.nasdaqomx.com/Index/Overview/NDX"
+   },
+   "oficial_fut": {
+    "nombre": "CME Group",
+    "url": "https://www.cmegroup.com/markets/equities/nasdaq/e-mini-nasdaq-100.html"
+   }
   },
   {
    "id": "eurostoxx50",
@@ -22,7 +38,11 @@
    "pais": "EU",
    "mercado": "^STOXX50E",
    "futuro": null,
-   "bolsa": "eu"
+   "bolsa": "eu",
+   "oficial": {
+    "nombre": "STOXX",
+    "url": "https://stoxx.com/index/sx5e/"
+   }
   },
   {
    "id": "ibex35",
@@ -30,7 +50,11 @@
    "pais": "ES",
    "mercado": "^IBEX",
    "futuro": null,
-   "bolsa": "eu"
+   "bolsa": "eu",
+   "oficial": {
+    "nombre": "BME",
+    "url": "https://www.bolsasymercados.es/bme-exchange/es/Indices/Ibex"
+   }
   },
   {
    "id": "dax",
@@ -38,7 +62,11 @@
    "pais": "DE",
    "mercado": "^GDAXI",
    "futuro": null,
-   "bolsa": "eu"
+   "bolsa": "eu",
+   "oficial": {
+    "nombre": "STOXX / Deutsche Börse",
+    "url": "https://stoxx.com/index/dax/"
+   }
   },
   {
    "id": "nikkei225",
@@ -46,7 +74,15 @@
    "pais": "JP",
    "mercado": "^N225",
    "futuro": "NIY=F",
-   "bolsa": "jp"
+   "bolsa": "jp",
+   "oficial": {
+    "nombre": "Nikkei",
+    "url": "https://indexes.nikkei.co.jp/en/nkave/index/profile?idx=nk225"
+   },
+   "oficial_fut": {
+    "nombre": "CME Group",
+    "url": "https://www.cmegroup.com/markets/equities/international-indices/nikkei-225-yen.html"
+   }
   },
   {
    "id": "hangseng",
@@ -54,7 +90,11 @@
    "pais": "HK",
    "mercado": "^HSI",
    "futuro": null,
-   "bolsa": "hk"
+   "bolsa": "hk",
+   "oficial": {
+    "nombre": "Hang Seng Indexes",
+    "url": "https://www.hsi.com.hk/eng/indexes/all-indexes/hsi"
+   }
   }
  ]
 }
