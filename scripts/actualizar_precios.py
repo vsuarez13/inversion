@@ -38,9 +38,16 @@ def descargar(simbolo):
     diario = serie(df_d)
     if not diario:
         raise RuntimeError("sin datos diarios")
-    df_i = t.history(period="1d", interval="5m", prepost=False)
+    import pandas as pd
+    try:  # los fondos (sin cotización continua) no tienen datos intradía: se usa el valor liquidativo diario
+        df_i = t.history(period="1d", interval="5m", prepost=False)
+    except Exception:
+        df_i = pd.DataFrame()
     intradia = serie(df_i)
-    semana = serie(t.history(period="5d", interval="30m", prepost=False))
+    try:
+        semana = serie(t.history(period="5d", interval="30m", prepost=False))
+    except Exception:
+        semana = []
     ultimo = intradia[-1][1] if intradia else diario[-1][1]
     ultima_hora = intradia[-1][0] if intradia else diario[-1][0]
     # cierre anterior: último cierre diario de un día anterior al de la sesión, en la hora local de la bolsa
