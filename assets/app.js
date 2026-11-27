@@ -298,7 +298,7 @@
       const x = e.etf || {}, idx = e.indice && UNI ? UNI.indices.find((i) => i.id === e.indice) : null;
       const esETF = e.tipo === "etf";
       h += '<section class="grupo"><h2>Datos del ' + (esETF ? "ETF" : "fondo") + '</h2><div class="analistas">' +
-        '<div class="kpi"><div class="k">Comisión anual (TER)</div><div class="v">' + (x.ter != null ? nf(x.ter, 2) + " %" : "—") + "</div></div>" +
+        '<div class="kpi"><div class="k">Comisión anual (TER)</div><div class="v">' + (x.ter ? nf(x.ter, 2) + " %" : "—") + "</div></div>" +
         '<div class="kpi"><div class="k">Patrimonio</div><div class="v">' + (x.patrimonio != null ? nf(aEUR(x.patrimonio, e.divisa) / 1000, 2) + " mil M€" : "—") + "</div></div>" +
         '<div class="kpi"><div class="k">Gestora</div><div class="v" style="font-size:18px">' + esc(x.gestora || "—") + "</div></div>" +
         '<div class="kpi"><div class="k">Índice que replica</div><div class="v" style="font-size:18px">' + esc(idx ? idx.nombre : (x.categoria || "—")) + "</div></div></div>" +
@@ -371,7 +371,7 @@
     const c = e.composicion;
     const barra = (nom, peso, max, sub) => '<li><div class="c-fila"><span class="c-nom">' + esc(nom) + (sub ? ' <span class="c-sub">' + esc(sub) + "</span>" : "") +
       '</span><span class="c-peso">' + nf(peso, 2) + ' %</span></div><div class="c-barra"><i style="width:' + Math.max(2, (peso / max) * 100).toFixed(1) + '%"></i></div></li>';
-    const ext = '<a href="https://www.justetf.com/es/etf-profile.html?isin=' + esc(e.isin) + '" target="_blank" rel="noopener">justETF ↗</a>';
+    const ext = e.tipo === "etf" ? '<a href="https://www.justetf.com/es/etf-profile.html?isin=' + esc(e.isin) + '" target="_blank" rel="noopener">justETF ↗</a>' : "el último informe mensual (factsheet) del fondo";
     if (!c) return '<section class="grupo"><h2>Composición</h2><p class="meta">Yahoo Finance no publica todavía la composición de este ' + (e.tipo === "etf" ? "ETF" : "fondo") +
       ". Se vuelve a intentar cada semana. Mientras tanto puedes verla en la web de la gestora o en " + ext + ".</p></section>";
     let h = '<section class="grupo"><h2>Composición</h2><div class="comp-grid">';
@@ -390,7 +390,7 @@
     const bolsaDe = (c) => ({ US: "us", JP: "jp", HK: "hk" })[c] || "eu";
     const idx = e.indice && UNI ? UNI.indices.find((i) => i.id === e.indice) : null;
     const dibujar = (f) => Grafico.grande($("#tv-emp"), { id: f === "ls" ? e.isin + "_ls" : e.isin, etiqueta: esc(e.nombre) + (f === "ls" ? ' <span class="fut">LS Exchange</span>' : ""),
-      bolsa: f === "ls" ? "ls" : bolsaDe((e.isin || "").slice(0, 2)), comparar: idx ? { id: idx.id, nombre: esc(idx.nombre) } : null });
+      bolsa: f === "ls" ? "ls" : e.tipo === "fondo" ? "fondo" : bolsaDe((e.isin || "").slice(0, 2)), comparar: idx ? { id: idx.id, nombre: esc(idx.nombre) } : null });
     Grafico.cargar(e.isin + "_ls").then((d) => {
       const pct = d.cierre_anterior ? (d.ultimo / d.cierre_anterior - 1) * 100 : null, pl = $("#precio-ls");
       if (pl) { pl.hidden = false; pl.innerHTML = 'En <a href="' + esc(d.url) + '" target="_blank" rel="noopener">LS Exchange ↗</a> (la de Trade Republic): <b>' + nf(d.ultimo, 2) + " €</b>" +

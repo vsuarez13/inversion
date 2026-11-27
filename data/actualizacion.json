@@ -1,7 +1,7 @@
 {
- "fecha": "2026-11-27T01:00:00+01:00",
+ "fecha": "2026-11-27T01:20:00+01:00",
  "tipo": "Actualización",
- "resumen": "Avisos de festivos, media sesión y mercado cerrado en cada gráfico. Los ETF tienen ficha propia y se comparan con su índice (línea gris). Añadido el Amundi IBEX 35 (FR0010655746).",
+ "resumen": "Composición de ETF y fondos (10 mayores posiciones y sectores). Precios de LS Exchange, la bolsa de Trade Republic, en cada ficha (botón «Precio de»). Botón «Fuente oficial» en cada índice.",
  "actualizadas": [],
- "nuevas": ["FR0010655746"]
+ "nuevas": ["FR0010655746", "IE000N4ZYX28"]
 }
