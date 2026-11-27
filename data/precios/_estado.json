@@ -1,5 +1,7 @@
 {
- "actualizado": "2026-11-27T00:03:34+00:00",
+ "actualizado": "2026-11-27T00:06:20+00:00",
  "series": 18,
- "errores": []
+ "errores": [
+  "IE000N4ZYX28 (0P0001XF42.F): 'tradingPeriods'"
+ ]
 }

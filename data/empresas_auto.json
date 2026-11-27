@@ -169,6 +169,65 @@
      "url": "https://finance.yahoo.com/quote/CS1.PA/holdings"
     }
    }
+  },
+  "IE000N4ZYX28": {
+   "tipo": "fondo",
+   "nombre": "iShares US Index (IE) S Acc EUR",
+   "ticker": "0P0001XF42",
+   "yahoo": "0P0001XF42.F",
+   "bolsa": "Frankfurt",
+   "tv": "0P0001XF42",
+   "pais": "IE",
+   "divisa": "EUR",
+   "sector": "general",
+   "descripcion": "",
+   "indice": null,
+   "precio": {
+    "v": 12.05,
+    "fecha": "2026-11-27",
+    "fuente": "yf"
+   },
+   "etf": {
+    "ter": 0.0005,
+    "patrimonio": null,
+    "categoria": "",
+    "gestora": "",
+    "rent_ytd": 16.3103
+   },
+   "ratios": {},
+   "analistas": null,
+   "notas": [
+    "Ficha automática de fondo con datos de Yahoo Finance."
+   ],
+   "fuentes": {
+    "yf": {
+     "nombre": "Yahoo Finance · ficha del fondo (automática)",
+     "url": "https://finance.yahoo.com/quote/0P0001XF42.F",
+     "fecha": "2026-11-27"
+    }
+   },
+   "automatica": true,
+   "composicion": {
+    "top": [],
+    "sectores": {
+     "Tecnología": 37.4,
+     "Financiero": 12.24,
+     "Comunicaciones": 9.91,
+     "Consumo cíclico": 9.57,
+     "Salud": 9.1,
+     "Industria": 8.16,
+     "Consumo básico": 4.61,
+     "Energía": 3.36,
+     "Utilities": 2.15,
+     "Inmobiliario": 1.88,
+     "Materiales": 1.62
+    },
+    "fecha": "2026-11-27",
+    "fuente": {
+     "nombre": "Yahoo Finance · composición (top 10)",
+     "url": "https://finance.yahoo.com/quote/0P0001XF42.F/holdings"
+    }
+   }
   }
  }
 }
